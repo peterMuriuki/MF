@@ -27,7 +27,8 @@ class TrippleOrNothing(Plans):
     def get_stake(self):
         return self.bank_balance
 
-    def update_bank_balance(self, odds=None)
+    def update_bank_balance(self, odds=None):
+        pass
 
 
 class DoubleOrNothing(Plans):

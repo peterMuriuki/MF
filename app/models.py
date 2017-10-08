@@ -1,7 +1,7 @@
 """Model the database relationships for data persistence"""
 from . import db
 
-class Predictions(db.Model)
+class Predictions(db.Model):
     __table_name__ = "predictions"
     id = db.Column(db.Integer(), primary_key=True)
     home_team = db.Column(db.String(64))
@@ -40,7 +40,7 @@ class Tipster(object):
     # each method's data transactions should be atomic
 
     def add_prediction(self, diction):
-        """creates a single instance of a predition and commits it to the database"""
+        """creates a single instance of a prediction and commits it to the database"""
         h_t, a_t, t_u, t_n, pick, con, odds = diction['home_team'], diction['away_team'], diction['tipster_url'], diction['tipster_name'], diction['pick'], diction['confindence'], diction['odds']
         prediction_obj = Predictions(h_t, a_t, t_u, t_n, pick, con, odds)
         db.session.add(prediction_obj)
