@@ -10,6 +10,9 @@ from datetime import datetime
 import json
 import requests
 from bs4 import BeautifulSoup
+from .models import Predictions, Tipster
+
+tipster = Tipster()
 
 
 def get_home_page(text=False):
@@ -75,18 +78,21 @@ def predictions_id_generator(diction):
     of the argument diction
     output: the updated diction"""
     # important parts: h_t, a_t, tipster_name, predition.
-    id = diction['tipster_name'] + diction['home_team'][:2] + diction['away_team'][:2] + diction['pick']
-    diction['prediction_id'] = id
+    pred_id = diction['tipster_name'] + diction['home_team'][:2] + diction['away_team'][:2] + diction['pick']
+    diction['prediction_id'] = pred_id
     return diction
 
 
-def instance_unique_checker():
+def instance_unique_checker(pred_id):
     """i need  function that will be able to check that a certain prediction is different from 
     from another that is already in the current single instance of the system.
      my first idea is to generate some sort of id 
     that is inclusive of the primary parts of the prediction."""
     # output: true if diction record is new or False if record is already existent
-    return
+    response = Predictions.query.filter_by(predictions_id = pred_id).first()
+    if response:
+        return False
+    return True
 
 def parse_table_rows(tr_list):
     """ extracts the data from the html table rows"""
@@ -146,6 +152,10 @@ def parse_table_rows(tr_list):
         temp_diction['confidence'] = confidence
         temp_diction['odds'] = odds
         temp_diction = predictions_id_generator(temp_diction)
+        if instance_unique_checker(temp_diction['prediction_id']):
+            pass
+        else:
+            tipster.add_prediction(temp_diction)
         return_list.append(temp_diction)
     return return_list
 

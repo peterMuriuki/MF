@@ -4,8 +4,7 @@ from flask_mail import Mail
 from flask_moment import Moment
 from flask import Flask
 from config import config
-from .main import main
-from .admin import admin
+
 
 
 mail = Mail()
@@ -24,7 +23,9 @@ def create_app(configuration_name):
     moment.init_app(app)
     db.init_app(app)
 
+    from .main import main
+    from .admin import admin
     app.register_blueprint(main)
-    app.register_blueprint(admin, url_prefix='/admin/')
+    app.register_blueprint(admin, url_prefix='/admin')
 
     return app

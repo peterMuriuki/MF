@@ -1,5 +1,5 @@
 import os
-database_uri = os.path.join(os.path.dirname(__name__), 'app', 'static', 'db', 'predictions.db')
+database_uri = os.path.join(os.path.dirname(__file__), 'app', 'static', 'db', 'predictions.db')
 
 
 class Configuration:
