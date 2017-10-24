@@ -1,28 +1,42 @@
 import os
-database_uri = os.path.join(os.path.dirname(__file__), 'app', 'static', 'db', 'predictions.db')
+database_base_uri = os.path.join(os.path.dirname(__file__), 'app', 'static', 'db')
 
 
 class Configuration:
+    # general configurations
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'adau fagkfa821b 32bdc^!$@sad'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + database_uri
+    # general mail configuration
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
     @staticmethod  
     def init_app(app):
         pass
 
+class MiddleWare(Conifguration):
+    """define the flask_mail configurations options
+    -> The Production Configuration will define its own mail configurations"""
+    MAIL_SERVER = 'smtp.googlemail.com'
+    MAIL_PORT = 587
 
-class DevelopmentConfiguration(Configuration):
+
+class DevelopmentConfiguration(MiddleWare):
     DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_uri, 'development.db')
 
 
-class TestingConfiguration(Configuration):
+class TestingConfiguration(MiddleWare):
     TESTING = True
     DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_uri, 'testing.db')
 
 
 class ProductionConfiguration(Configuration):
-    pass
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_uri, 'production.db')
+    MAIL_SERVER = 'smtp.googlemail.com'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
 
 
 config = {
