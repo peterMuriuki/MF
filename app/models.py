@@ -12,16 +12,18 @@ class Predictions(db.Model):
     pick = db.Column(db.String(5))
     confidence = db.Column(db.Float())
     odds = db.Column(db.Float())
-    confirmed = db.Column(db.Boolean())
+    approved = db.Column(db.Boolean())
+    home_score = db.Column(db.integer(), nullable=True)
+    away_score = db.Column(db.Integer(), nullable=True)
     sport = db.Column(db.String(20))
 
     def __repr__(self):
         """returns/displays an arbitrary representation of a row"""
         return "<Prediction %r %r %r %r %r %r %r %r %r %r>" % (self.id, self.home_team, self.away_team,
-    self.tipster_url, self.tipster_url, self.pick, self.confidence, self.odds, self.confirmed, self.sport)
+    self.tipster_url, self.tipster_url, self.pick, self.confidence, self.odds, self.approved, self.sport)
 
     def __init__(self, prediction_id, home_team, away_team, tipster_url, tipster_name, pick,
-    confidence, odds, sport='', confirmed=False):
+    confidence, odds, sport='', approve=False):
         self.prediction_id = prediction_id
         self.home_team = home_team
         self.away_team = away_team
@@ -30,12 +32,33 @@ class Predictions(db.Model):
         self.pick = pick
         self.confidence = confidence
         self.odds = odds
-        self.confirmed = confirmed
+        self.approved = approve
         self.sport = sport
 
-    def confirm(self):
-        """After a prediction is looked up abd confirmed by admin; set confirm to True"""
-        self.confirmed = True
+    def approve(self):
+        """After a prediction is looked up and approved by admin; set confirm to True"""
+        self.approved = True
+
+    def set_score(self, home_score, away_score):
+        """set the result after full time. asynchronously check the odds"""
+        self.home_score = home_score
+        self.away_score = away_score
+
+class Users(db.Model):
+    __table_name__ = "users"
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(80))
+    email = db.Column(db.String(50), unique=True)
+    password = db.Column(db.String(100))
+    phone_number = db.Column(db.Iinteger(), nullable=True)
+    admin = db.Column(db.Boolean())
+    
+    def __init__(self, name, email, phone, password, admin=False):
+        self.name = name
+        self.email = email
+        self.phone_number = phone
+        self.password = password
+        self.admin = admin
 
 class Tipster(object):
     """toolboc for all methods and functions for manipulating the predictions"""
@@ -48,7 +71,43 @@ class Tipster(object):
         db.session.add(prediction_obj)
         db.session.commit()
 
-    def confirm_prediction(self, prediction_obj):
+    def approve_prediction(self, prediction_obj):
         """ calls the confirm method from the parsed in prediction_obj"""
-        prediction_obj.confirm()
+        prediction_obj.approve()
         return True
+
+    def get_all_predictions(self):
+        """qeuries the Predictions relations for all existent predictions
+        output:-> returns them as a dictionary of lists"""
+        response = Predictions.query.all()
+        return {'predictions': response}
+
+
+class Plans(object):
+    """the base class that models all the other plans"""
+
+    def __init__(self):
+        bank_balance = 0.00
+
+    def get_stake(self):
+        """ to be overriden in the different plans"""
+
+    def update_bank_balance(self):
+        """Also to be overriden """
+
+
+class TrippleOrNothing(Plans):
+    """this plan; you stake all on an odd of three"""
+
+    def __init__(self):
+        super().__init__()
+
+    def get_stake(self):
+        return self.bank_balance
+
+    def update_bank_balance(self, odds=None):
+        pass
+
+
+class DoubleOrNothing(Plans):
+    """ all money back on double odds."""

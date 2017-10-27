@@ -6,10 +6,10 @@ from flask import Flask
 from config import config
 
 
-
 mail = Mail()
 moment = Moment()
 db = SQLAlchemy()
+
 
 def create_app(configuration_name):
     app = Flask(__name__)
