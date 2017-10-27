@@ -84,7 +84,7 @@ class Tipster(object):
         response = Predictions.query.all()
         return {'predictions': response}
 
-    def add_punter(self, data):
+    def add_sharp(self, data):
         """adds a new user to database"""
         name = data['name']
         email = data['email']
@@ -96,6 +96,17 @@ class Tipster(object):
         db.session.commit()
         return True
 
+    def delete_sharp(self, user_obj):
+        """remove a user from the database"""
+        try:
+            db.session.delete(user_obj)
+            db.session.commit()
+        except:
+            return False
+        return True
+
+    def modify_sharp(self, data, user):
+        """Modifies a user credentials"""
 
 class Plans(object):
     """the base class that models all the other plans"""
