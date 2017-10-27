@@ -9,7 +9,7 @@
 import re, sys, requests
 from datetime import datetime
 from bs4 import BeautifulSoup
-from . import Predictions, Tipster
+from .models import Predictions, Tipster
 
 tipster = Tipster()
 

@@ -1,12 +1,21 @@
-from flask import request, url_for
+from flask import request, url_for, make_response, jsonify
+import datetime, os
+from itsdangerous import TimedJSONWebSignatureSerializer as serializer
+from werkzeug.security import check_password_hash
 from flask_restful import Resource, Api
 from . import main
-from ..models import Tipster
+from ..models import Tipster, Users
+from manage import app
 from ..scrapper import run
-
+from functools import wraps
 
 api = Api(main)
 tipster = Tipster()
+
+# login wrapper method:-> for receiving the security token and returning boolean
+# this method only ensures that the routes are protected against anonymous users only
+# the admin_only decorator will return true or false based on whether the current user is an admin
+
 
 
 class Default(Resource):
@@ -28,7 +37,7 @@ class Default(Resource):
     def post(self):
         """There is some controversy on whether i should allow this method or even if
         this method should have been created in the first place."""
-        return {'message': 'method not allowed for now'}, 503
+        return make_response({'message': 'method not allowed for now'}, 503)
 
     def put(self):
         """displays the allowed urls for activating a prediction"""
@@ -55,11 +64,14 @@ class Tips_id(Resource):
         output: -> message; and object details"""
         return {'message': 'approved {}'.format(pred_id)}
 
-    def get(self, pred_id):
+    @token_required
+    def get(self, current_user, pred_id):
         """Returns a single instance of the prediction
         input: -> prediction id
         output: -> a dictionary containing the single prediction id
         """
+        if not current_user:
+            return {'message': 'Authorization error, please recheck your token'}
         return {'message': 'returned {} only'.format(pred_id)}
 
     def delete(self, pred_id):
@@ -81,14 +93,17 @@ class Tips(Resource):
         data = request.get_json()
         return {'message': 'just added '}
 
-    def get(self):
+    @token_required
+    def get(self, current_user):
         """ returns a list of the current predictions of the current day, during test return all predictions
         input: -> nothing
         output: -> a dictionary of lists"""
+        if not current_user:
+            return {'message': 'Authorization error, please recheck your token'}
         run()
         return {'message': 'returned all'}
 
 
 
 api.add_resource(Tips_id, '/predictions/<string:pred_id>')
-api.add_resource(Tips, '/predictions')
+api.add_resource(Tips, '/predictions/')

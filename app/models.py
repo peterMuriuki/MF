@@ -1,5 +1,6 @@
 """Model the database relationships for data persistence"""
 from . import db
+from werkzeug.security import generate_password_hash
 
 class Predictions(db.Model):
     __table_name__ = "predictions"
@@ -13,7 +14,7 @@ class Predictions(db.Model):
     confidence = db.Column(db.Float())
     odds = db.Column(db.Float())
     approved = db.Column(db.Boolean())
-    home_score = db.Column(db.integer(), nullable=True)
+    home_score = db.Column(db.Integer(), nullable=True)
     away_score = db.Column(db.Integer(), nullable=True)
     sport = db.Column(db.String(20))
 
@@ -48,17 +49,18 @@ class Users(db.Model):
     __table_name__ = "users"
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80))
+    user_name = db.Column(db.String(40))
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(100))
-    phone_number = db.Column(db.Iinteger(), nullable=True)
+    phone_number = db.Column(db.Integer(), nullable=True)
     admin = db.Column(db.Boolean())
     
-    def __init__(self, name, email, phone, password, admin=False):
+    def __init__(self, name, user_name, email, password, admin=False):
         self.name = name
         self.email = email
-        self.phone_number = phone
-        self.password = password
+        self.password = generate_password_hash(password)
         self.admin = admin
+        self.user_name = user_name
 
 class Tipster(object):
     """toolboc for all methods and functions for manipulating the predictions"""
@@ -81,6 +83,18 @@ class Tipster(object):
         output:-> returns them as a dictionary of lists"""
         response = Predictions.query.all()
         return {'predictions': response}
+
+    def add_punter(self, data):
+        """adds a new user to database"""
+        name = data['name']
+        email = data['email']
+        user_name = data['user_name']
+        password = data['password']
+
+        user = Users(name=name, user_name=user_name, email=email, password=password)
+        db.session.add(user)
+        db.session.commit()
+        return True
 
 
 class Plans(object):

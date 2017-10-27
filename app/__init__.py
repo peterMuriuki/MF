@@ -24,8 +24,8 @@ def create_app(configuration_name):
     db.init_app(app)
 
     from .main import main
-    from .admin import admin
+    from .admin import user
     app.register_blueprint(main)
-    app.register_blueprint(admin, url_prefix='/admin')
+    app.register_blueprint(admin, url_prefix='/users/')
 
     return app

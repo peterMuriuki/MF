@@ -4,3 +4,4 @@ app/admin/__pycache__/
 app/main/__pycache__/
 app/__pycache__/
 files/
+!/files/
