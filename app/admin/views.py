@@ -1,7 +1,7 @@
 """This module abstracts user functions and separates them from normal tipster actions such as those
 in the main blueprint"""
 
-from flask import request, url_for, make_response, jsonify
+from flask import request, make_response, jsonify
 from itsdangerous import TimedJSONWebSignatureSerializer as serializer
 from werkzeug.security import check_password_hash
 from flask_restful import Resource, Api
@@ -10,8 +10,9 @@ from ..models import Tipster, Users
 from manage import app
 from functools import wraps
 
-
+tipster = Tipster()
 api = Api(user)
+
 
 def token_required(f):
     @wraps(f)
@@ -34,17 +35,23 @@ def token_required(f):
         return f(user, *args, **kwargs)
     return decorated
 
+
 def login_failed():
     return make_response('could not verify', 401, {
                 'WWW-Authenticate' : 'Basic realm="Login required"'
             })
 
+
 class User(Resource):
     """
     Functions:
-    -> Resgister: -> post details to create an account
+    -> Register: -> post details to create an account
     -> login -> post account login credentials to have access to a security token
-    -> put-registration -> to update a user's profile
+    -> edit -> to update a user's profile(put operations)
+    -> admin tasks:
+        -> get a list of all users
+        -> delete users
+        -> promote users to admin
     """
 
 
@@ -111,11 +118,52 @@ class Login(User):
             return jsonify({'token': token})
         return login_failed()
 
-class RERegister(User):
-    def put(self, user_id):
-        """Modification of an existing account instance by the account owner"""
 
-api.add_resource(Register, '/')
+class RERegister(User):
+    @token_required
+    def put(self, user, user_id):
+        """Modification of an existing account instance by the account owner"""
+        current_user = Users.query.filter_by(id=user_id).first()
+        if user.admin:
+            # means we are promoting user
+            if not current_user.admin:
+                current_user.admin = True
+                return {'message': 'user succesfully modified',
+                    'url': '',
+                    'user_details': ''
+                    }
+            else:
+                current_user.admin = False
+                return {'message': 'user succesfully modified',
+                    'url': '',
+                    'user_details': ''
+                    }
+        if user.id != current_user.id:
+            return {'message': 'Method not allowed'}
+        data = request.get_json()
+        # we know just modify the new information
+        response = tipster.modify_user(data)
+        if response:
+            return {'message': 'user succesfully modified',
+                    'url': '',
+                    'user_details': ''
+                    }
+        else:
+            return {'message': 'ERROR: user not modified'}
+
+    def delete(self, user, user_id):
+        """admin_eyes and accounts owner eyes only"""
+        current_user = Users.query.filter_by(id=user_id).first()
+        if user.id != current_user.id or not user.admin:
+            return {'message': 'Method not allowed'}
+        done = tipster.delete_user(user)
+        if done:
+            return {'message': 'user deleted'}
+        else:
+            return {'message': 'user not deleted'}
+
+
+api.add_resource(Register, '/register')
 api.add_resource(RERegister, '/<int:user_id>')
 api.add_resource(Login, '/login')
 
