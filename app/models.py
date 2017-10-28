@@ -1,6 +1,8 @@
 """Model the database relationships for data persistence"""
 from . import db
 from werkzeug.security import generate_password_hash
+from marshmallow import fields, Schema, post_load
+
 
 class Predictions(db.Model):
     __table_name__ = "predictions"
@@ -45,6 +47,26 @@ class Predictions(db.Model):
         self.home_score = home_score
         self.away_score = away_score
 
+class PredictionsSchema(Schema):
+    """ defines the schema for serializing and deserializing dictionaries and objects"""
+    id = fields.Integer()
+    prediction_id = fields.String()
+    home_team = fields.String()
+    away_team = fields.String()
+    tipster_url = fields.String()
+    tipster_name = fields.String()
+    pick = fields.String()
+    confidence = fields.Float()
+    odds = fields.Float()
+    approved = fields.Boolean()
+    home_score = fields.Integer()
+    away_score = fields.Integer()
+    sport = fields.String()
+
+    @post_load
+    def make_user(self, data):
+        return Predictions(**data)
+
 class Users(db.Model):
     __table_name__ = "users"
     id = db.Column(db.Integer(), primary_key=True)
@@ -61,6 +83,20 @@ class Users(db.Model):
         self.password = generate_password_hash(password)
         self.admin = admin
         self.user_name = user_name
+
+class UsersSchema(Schema):
+    """Defines the serialization and deserialization of the users class to and from dict to python object"""
+    id = fields.Integer()
+    name = fields.String()
+    user_name = fields.String()
+    email = fields.String()
+    password = fields.String()
+    phone_number = fields.Integer()
+    admin = fields.Boolean()
+
+    @post_load
+    def make_user(self, data):
+        return Users(**data)
 
 class Tipster(object):
     """toolboc for all methods and functions for manipulating the predictions"""
