@@ -69,7 +69,7 @@ def get_all_other_tips():
     flagging procedure will be based on the tip that appears more than once."""
     pozostali_url = '''http://www.typersi.com/pozostali,remainder.html'''
     page_html = requests.get(pozostali_url)
-    soup = BeautifulSoup(page_html)
+    soup = BeautifulSoup(page_html.text)
     # eff_table = get_efficient_table(soup)
     # desired_table = eff_table.next_sibling.next_sibling.next_sibling.next_sibling - > for the usual unlabeled home page table
     # we need to redefine how to get the desired table
@@ -121,25 +121,16 @@ def parse_table_rows(tr_list):
         tipster_url = 'http://www.typersi.com/' + first_td.a.get('href')
         tipster_name = first_td.a.get_text()
         # timing functionality
-        second_td =td_list[1]
+        second_td = td_list[1]
         time_as_string = second_td.get_text()
-        if len(re.findall(':', time_as_string)):
-            time_as_list = time_as_string.split(':')
-        else:
-            time_as_list = time_as_string.split(',')
-        hour = int(time_as_list[0])
-        minute = int(time_as_list[1])
+        hour = time_splitter(time_as_string)[0]
+        minute = time_splitter(time_as_string)[1]
         today = datetime.today()
         time_of_play = datetime(today.year, today.month, today.day, hour, minute)
-        # the match including both the home team and the away team
+        time_of_play.hour + 1
+        # the fixture including both the home team and the away team
         third_td = td_list[2]
-        match = third_td.get_text()
-        if match.find('-'):
-            home_and_away = match.split(' - ')
-        elif match.find('vs'):
-            home_and_away = match.split(' vs ')
-        home_team = home_and_away[0]
-        away_team = home_and_away[1]
+        fixture = third_td.get_text().strip()
         # the pick
         fourth_td = td_list[3]
         if len(re.findall(r'\d', fourth_td.get_text())) > 0:
@@ -165,8 +156,7 @@ def parse_table_rows(tr_list):
         temp_diction['tipster_url'] = tipster_url
         temp_diction['tipster_name'] = tipster_name
         temp_diction['time_of_play'] = time_of_play.__str__()
-        temp_diction['home_team'] = home_team
-        temp_diction['away_team'] = away_team
+        temp_diction['fixture'] = fixture
         temp_diction['pick'] = pick
         temp_diction['confidence'] = confidence
         temp_diction['odds'] = odds
@@ -202,15 +192,39 @@ def instance_unique_checker(pred_id):
 
 def get_optimum_three(soup):
     """I think there is a side of this that i think we are not considering,.. instead of randomly picking
-    matches whose odds are going to line up with our target how about picking these matches from a more specialised
+    fixtures whose odds are going to line up with our target how about picking these fixtures from a more specialised
     pool. A pool that we have also filtered through"""
     # input is from the tipsters with the best efficiency
     pass
+
+
+def time_splitter(string):
+    """This function will deive the hour and minutes that a game will be played from a string
+    it will also check the integrity of such a time"""
+    # date format is -> two digits, a separator and another two digits
+    pattern = r'\d{1:2}'
+    time_list = re.findall(pattern, string)
+    hour, minute = 0, 0
+    if len(time_list) != 2:
+        # send an email to admin
+        pass
+    try:
+        hour = int(time_list[0])
+        minute = int(time_list[1])
+    except ValueError:
+        #send an email: refused to cast into integer
+        pass
+    if not 0 >= hour <= 23 and not 0 >= minute <= 59:
+        # send an email: data integrity broken
+        pass
+    return [hour, minute]
+
 
 def run():
     """run the get efficient tips commands"""
     soup = get_home_page()
     get_picks_from_tipsters_with_the_best_efficiency(soup)
+    get_all_other_tips()
 
 if __name__ == '__main__':
     run()

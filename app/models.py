@@ -8,8 +8,7 @@ class Predictions(db.Model):
     __table_name__ = "predictions"
     id = db.Column(db.Integer(), primary_key=True)
     prediction_id = db.Column(db.String(), unique=True)
-    home_team = db.Column(db.String(64))
-    away_team = db.Column(db.String(64))
+    fixture = db.Column(db.String(100))
     tipster_url = db.Column(db.String(64))
     tipster_name = db.Column(db.String(64))
     pick = db.Column(db.String(5))
@@ -22,14 +21,13 @@ class Predictions(db.Model):
 
     def __repr__(self):
         """returns/displays an arbitrary representation of a row"""
-        return "<Prediction %r %r %r %r %r %r %r %r %r %r>" % (self.id, self.home_team, self.away_team,
+        return "<Prediction %r %r %r %r %r %r %r %r %r %r>" % (self.id, self.fixture,
     self.tipster_url, self.tipster_url, self.pick, self.confidence, self.odds, self.approved, self.sport)
 
-    def __init__(self, prediction_id, home_team, away_team, tipster_url, tipster_name, pick,
+    def __init__(self, prediction_id, fixture, tipster_url, tipster_name, pick,
     confidence, odds, sport='', approve=False):
         self.prediction_id = prediction_id
-        self.home_team = home_team
-        self.away_team = away_team
+        self.fixture = fixture
         self.tipster_url = tipster_url
         self.tipster_name = tipster_name
         self.pick = pick
@@ -51,10 +49,8 @@ class PredictionsSchema(Schema):
     """ defines the schema for serializing and deserializing dictionaries and objects"""
     id = fields.Integer()
     prediction_id = fields.String()
-    home_team = fields.String()
-    away_team = fields.String()
+    fixture = fields.String()
     tipster_url = fields.String()
-    tipster_name = fields.String()
     pick = fields.String()
     confidence = fields.Float()
     odds = fields.Float()
@@ -89,7 +85,7 @@ class UsersSchema(Schema):
     id = fields.Integer()
     name = fields.String()
     user_name = fields.String()
-    email = fields.String()
+    email = fields.Email()
     password = fields.String()
     phone_number = fields.Integer()
     admin = fields.Boolean()
@@ -104,8 +100,8 @@ class Tipster(object):
 
     def add_prediction(self, diction):
         """creates a single instance of a prediction and commits it to the database"""
-        pred_id, h_t, a_t, t_u, t_n, pick, con, odds = diction['prediction_id'], diction['home_team'], diction['away_team'], diction['tipster_url'], diction['tipster_name'], diction['pick'], diction['confidence'], diction['odds']
-        prediction_obj = Predictions(pred_id, h_t, a_t, t_u, t_n, pick, con, odds)
+        pred_id, h_t, t_u, t_n, pick, con, odds = diction['prediction_id'], diction['fixture'], diction['tipster_url'], diction['tipster_name'], diction['pick'], diction['confidence'], diction['odds']
+        prediction_obj = Predictions(pred_id, h_t, t_u, t_n, pick, con, odds)
         db.session.add(prediction_obj)
         db.session.commit()
 

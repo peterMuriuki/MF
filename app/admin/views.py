@@ -1,17 +1,20 @@
-"""This module abstracts user functions and separates them from normal tipster actions such as those
-in the main blueprint"""
-
+"""
+This module abstracts user functions and separates them from normal tipster actions such as those
+in the main blueprint
+"""
 from flask import request, make_response, jsonify
-from itsdangerous import TimedJSONWebSignatureSerializer as serializer
+import jwt
+import datetime as dt
 from werkzeug.security import check_password_hash
 from flask_restful import Resource, Api
 from . import user
-from ..models import Tipster, Users
+from ..models import Tipster, Users, UsersSchema
 from manage import app
 from functools import wraps
 
 tipster = Tipster()
 api = Api(user)
+userschema = UsersSchema(many=True)
 
 
 def token_required(f):
@@ -26,13 +29,39 @@ def token_required(f):
         if not token:
             return {'message': 'Token is missing'}
         try:
-            agent = serializer(app.config['SECRET_KEY'])
-            user = Users.query.filter_by(id=agent.loads(token)['user_id']).first()
+            key = app.config['SECRET_KEY']
+            data = jwt.decode(token, key)
+            user = Users.query.filter_by(id=data['user_id']).first()
             if user is None:
                 raise Exception('user is None')
         except:
             return {'message': 'Token is invalid'}
         return f(user, *args, **kwargs)
+    return decorated
+
+
+def admin_eyes(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        """
+        returns an instance of the user class else returns a None object if the user is not found
+        """
+        token = False
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+        if not token:
+            return {'message': 'Token is missing'}
+        try:
+            key = app.config['SECRET_KEY']
+            data = jwt.decode(token, key)
+            user = Users.query.filter_by(id=data['user_id']).first()
+            if user is None:
+                raise Exception('user is None')
+        except:
+            return {'message': 'Token is invalid'}
+        if user.admin:
+            return f(*args, **kwargs)
+        return {'message': 'Method is not allowed'}
     return decorated
 
 
@@ -82,23 +111,46 @@ class Register(User):
                     'url': ''
             }
 
-    def get(self):
+
+
+class Many(User):
+    """ supports get only-> returns a list of all the users and their details"""
+    @token_required
+    @admin_eyes
+    def get(self, current_user):
         """classified admin eyes only
         returns a list of all the users in the system"""
+        # if not current_user.admin:
+        #     return {'message': 'Method not allowed'}, 503
         users = Users.query.all()
         semi_list = list()
         for user in users:
-            list_ = dict()
-            list_['name'] = user.name
-            list_['user_name'] = user.user_name
-            list_['password'] = user.password
-            list_['id'] = user.id
-            list_['admin'] = user.admin
-            semi_list.append(list_)
+            semi_list.append(user)
 
-        return {'users': semi_list}
+        response = userschema.dump(semi_list)
+        diction_data = response.data
+        return {'users': diction_data}
+
+api.add_resource(Many, '/')
 
 
+class Single(User):
+    """ REturns a single instance of a user"""
+    @token_required
+    def get(self, current_user, user_id):
+        """classified owner's eyes only"""
+        if current_user.id != user_id:
+            # check that the logged in user is the same as the one authenticated
+            return {'message': 'Method not allowed'}, 503
+        user = Users.query.filter_by(id=user_id).first()
+        if not user:
+            return {'message': 'user not found'}, 404
+        userschema = UsersSchema()
+        schemaobject = userschema.dump(user)
+        return {'users': schemaobject.data}
+
+
+api.add_resource(Single, '/<int:user_id>')
 
 class Login(User):
     """authenticate a person and return a token for future authentications
@@ -113,9 +165,8 @@ class Login(User):
         if not user:
             login_failed()
         if check_password_hash(user.password, auth.password):
-            s = serializer(app.config['SECRET_KEY'], expires_in=3600)
-            token = s.dumps({'user_id': user.id})
-            return jsonify({'token': token})
+            token = jwt.encode({'user_id': user.id, 'exp': dt.datetime.utcnow() + dt.timedelta(hours=1)}, app.config['SECRET_KEY'])
+            return jsonify({'token': token.decode("UTF-8")})
         return login_failed()
 
 
@@ -151,6 +202,7 @@ class RERegister(User):
         else:
             return {'message': 'ERROR: user not modified'}
 
+    @admin_eyes
     def delete(self, user, user_id):
         """admin_eyes and accounts owner eyes only"""
         current_user = Users.query.filter_by(id=user_id).first()
