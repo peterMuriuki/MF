@@ -19,10 +19,10 @@ predschema = PredictionsSchema(many=True)
 def default_response():
     return {'urls':
                     {
-                        'endpoint' : 'url_ednpoint',
-                        'Predictions': url_for(Tips, _external=True),
-                        'users': url_for(Users, _external=True),
-                        'help': url_for(Default, _external=True)
+                        'endpoint' : 'url_ednpoint'
+                        # 'Predictions': url_for(Tips, _external=True),
+                        # 'users': url_for(Users, _external=True),
+                        # 'help': url_for(Default, _external=True)
                     }
             }
 
