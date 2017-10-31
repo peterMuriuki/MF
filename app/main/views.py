@@ -107,7 +107,7 @@ class Tips(Resource):
         list_ = []
         for prediction in predictions:
             list_.append(prediction)
-
+        run()
         result = predschema.dump(list_)
         return {'predictions': result.data}
 

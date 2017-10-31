@@ -20,7 +20,7 @@ def get_home_page(text=False):
     home_url = 'http://www.typersi.com'
     index_html = requests.get(home_url).text
     if text:
-        # return a text reponse
+        # return a text response
         return index_html
     soup = BeautifulSoup(index_html, 'html.parser')
     return soup
@@ -81,17 +81,35 @@ def get_all_other_tips():
     return _response
 
 
+def over_under(string):
+    """Take in a string and determine if the string denotes a pick whose market is the over/under"""
+    string = str.upper(string)
+    if string.find('OVER') > 0:
+        return True
+    elif string.find('+') > 0:
+        return True
+    elif string.find('OV') > 0:
+        return True
+    return False
+
+
 def all_tips_occurrence_checker(diction):
     """input: dictionary with the key 'all' that contains a list that has the scrapped and formatted data
     output: a dictionary with a key value that denotes the value """
+    # i think several picks can be saying the same thing in a different way and they should
+    # compiled so that the physical representation does not harbour this process
     check_string = ''
     # diction = json_response
     data_list = diction['all']
     for diction in data_list:
-        temp_string = diction['home_team'][:2] + diction['away_team'][:2] + diction['pick']
+        temp_string = diction['fixture'] + diction['pick']
         check_string += temp_string
+    for diction in diction['all']:
+        temp_string = diction['fixture'] + diction['pick']
         count = len(re.findall(temp_string, check_string))
         diction['count'] = count
+        if over_under(diction['pick']):
+            diction['count'] = len(diction['all'])
     return diction
 
 
@@ -102,7 +120,7 @@ def all_other_tips_compiler(soup):
     doi = all_tips_occurrence_checker(dict_response)  # doi dictionary of interest
     data_list = doi['all']
     for diction in data_list:
-        if diction['count'] > 1:
+        if diction['count'] > 1 and instance_unique_checker(diction['prediction_id']):
             tipster.add_prediction(diction)
     return True
 
@@ -173,7 +191,7 @@ def prediction_id_generator(diction):
     of the argument diction
     output: the updated diction"""
     # important parts: h_t, a_t, tipster_name, predition.
-    pred_id = diction['tipster_name'] + diction['home_team'][:3] + diction['away_team'][:3] + diction['pick']
+    pred_id = diction['tipster_name'] + diction['fixture'][2:7] + diction['pick']
     diction['prediction_id'] = pred_id
     return diction
 
@@ -189,6 +207,7 @@ def instance_unique_checker(pred_id):
         return False
     elif response is None:
         return True
+
 
 def get_optimum_three(soup):
     """I think there is a side of this that i think we are not considering,.. instead of randomly picking

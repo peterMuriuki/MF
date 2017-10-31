@@ -97,14 +97,14 @@ class Register(User):
         """
         data = request.get_json()
         try:
-            yes = tipster.add_punter(data)
+            yes = tipster.add_sharp(data)
         except KeyError:
             return {'message': 'error with the keys', 'sample':
                 {
-                    'name': '<name>',
-                    'email': '<email>',
-                    'user_name': '<user_name>',
-                    'password': '<password>'
+                    "name": "<name>",
+                    "email": "<email>",
+                    "user_name": "<user_name>",
+                    "password": "<password>"
                 }}
         if yes:
             return {'message': 'successfully added',
@@ -135,7 +135,7 @@ api.add_resource(Many, '/')
 
 
 class Single(User):
-    """ REturns a single instance of a user"""
+    """ Returns a single instance of a user"""
     @token_required
     def get(self, current_user, user_id):
         """classified owner's eyes only"""
@@ -193,7 +193,7 @@ class RERegister(User):
             return {'message': 'Method not allowed'}
         data = request.get_json()
         # we know just modify the new information
-        response = tipster.modify_user(data)
+        response = tipster.modify_sharp(data)
         if response:
             return {'message': 'user succesfully modified',
                     'url': '',
@@ -208,7 +208,7 @@ class RERegister(User):
         current_user = Users.query.filter_by(id=user_id).first()
         if user.id != current_user.id or not user.admin:
             return {'message': 'Method not allowed'}
-        done = tipster.delete_user(user)
+        done = tipster.delete_sharp(user)
         if done:
             return {'message': 'user deleted'}
         else:
