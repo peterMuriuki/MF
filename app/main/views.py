@@ -62,7 +62,12 @@ class Tips_id(Resource):
         """ updates the approved boolean property of the prediction
         input: -> the Prediction's prediction_key from decoded secret key
         output: -> message; and object details"""
-        return {'message': 'approved {}'.format(pred_id)}
+        pred_obj = Predictions.query.filter_by(id=pred_id).first()
+        pred_obj = tipster.approve_prediction(pred_obj)
+        return {
+                    'message': 'approved {}'.format(pred_id),
+                    "url": ""
+                }
 
     @token_required
     def get(self, current_user, pred_id):
@@ -78,6 +83,9 @@ class Tips_id(Resource):
         """removes the prediction instance
         input: -> encoded secret key with the predictions prediction_id
         output: -> message"""
+        pred_obj = Predictions.query.filter_by(id=pred_id).first()
+        db.session.remove(pred_obj)
+        db.session.commit(0)
         return {'message': 'Prediction deleted'}
 
     
@@ -93,7 +101,7 @@ class Tips(Resource):
         input: -> diction from scrapped data
         output -> urls for the created resource; serialized object"""
         data = request.get_json()
-        return {'message': 'just added '}
+        return {'message': 'Prediction created successfully'}
 
     @token_required
     def get(self, current_user):
