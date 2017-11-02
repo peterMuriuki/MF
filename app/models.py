@@ -18,14 +18,15 @@ class Predictions(db.Model):
     home_score = db.Column(db.Integer(), nullable=True)
     away_score = db.Column(db.Integer(), nullable=True)
     sport = db.Column(db.String(20))
+    count = db.Column(db.Integer(), nullable=True)
 
     def __repr__(self):
         """returns/displays an arbitrary representation of a row"""
-        return "<Prediction %r %r %r %r %r %r %r %r %r %r>" % (self.id, self.fixture,
+        return "<Prediction %r %r %r %r %r %r %r %r %r>" % (self.id, self.fixture,
     self.tipster_url, self.tipster_url, self.pick, self.confidence, self.odds, self.approved, self.sport)
 
     def __init__(self, prediction_id, fixture, tipster_url, tipster_name, pick,
-    confidence, odds, sport='', approve=False):
+    confidence, odds, sport='', approve=False, count=0):
         self.prediction_id = prediction_id
         self.fixture = fixture
         self.tipster_url = tipster_url
@@ -35,6 +36,7 @@ class Predictions(db.Model):
         self.odds = odds
         self.approved = approve
         self.sport = sport
+        self.count = count
 
     def approve(self):
         """After a prediction is looked up and approved by admin; set confirm to True"""
@@ -58,6 +60,7 @@ class PredictionsSchema(Schema):
     home_score = fields.Integer()
     away_score = fields.Integer()
     sport = fields.String()
+    count = fields.Integer()
 
     @post_load
     def make_user(self, data):
@@ -108,7 +111,8 @@ class Tipster(object):
     def approve_prediction(self, prediction_obj):
         """ calls the confirm method from the parsed in prediction_obj"""
         prediction_obj.approve()
-        return True
+        db.session.commit()
+        return prediction_obj
 
     def get_all_predictions(self):
         """qeuries the Predictions relations for all existent predictions

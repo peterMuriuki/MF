@@ -14,11 +14,17 @@ from .models import Predictions, Tipster
 tipster = Tipster()
 
 
-def get_home_page(text=False):
+def get_home_page(text=False, file=None):
     """returns either a soup object or string object as per the given arguments
      soup_object by default"""
-    home_url = 'http://www.typersi.com'
-    index_html = requests.get(home_url).text
+    if file is None:
+        home_url = 'http://www.typersi.com'
+        index_html = requests.get(home_url).text
+    else:
+        # readfiles and return text
+        file_handler = open(file, 'r')
+        contents = file_handler.read()
+        index_html = contents
     if text:
         # return a text response
         return index_html
@@ -63,13 +69,19 @@ def get_all_tips_desired_table(soup):
     return desired_table
 
 
-def get_all_other_tips():
+def get_all_other_tips(file=None):
     """ input: soup object representing the full webpage
     process: retrieve the others link and extract all the other remaining tips
     flagging procedure will be based on the tip that appears more than once."""
-    pozostali_url = '''http://www.typersi.com/pozostali,remainder.html'''
-    page_html = requests.get(pozostali_url)
-    soup = BeautifulSoup(page_html.text)
+    if file is None:
+        pozostali_url = '''http://www.typersi.com/pozostali,remainder.html'''
+        page_html = requests.get(pozostali_url)
+        page_text = page_html.text
+    else:
+        with open(file, 'r') as file_handler:
+            page_text = file_handler.read()
+
+    soup = BeautifulSoup(page_text, 'html.parser')
     # eff_table = get_efficient_table(soup)
     # desired_table = eff_table.next_sibling.next_sibling.next_sibling.next_sibling - > for the usual unlabeled home page table
     # we need to redefine how to get the desired table
@@ -230,7 +242,7 @@ def time_splitter(string):
     try:
         hour = int(time_list[0])
         minute = int(time_list[1])
-    except ValueError:
+    except :
         #send an email: refused to cast into integer
         pass
     if not 0 >= hour <= 23 and not 0 >= minute <= 59:
