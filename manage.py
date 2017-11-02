@@ -5,7 +5,7 @@ from app import create_app, db
 import os
 
 
-app = create_app(os.environ.get('CONFIGURE') or 'default')
+app = create_app(os.environ.get('CONFIGURATION') or 'default')
 manager = Manager(app=app)
 migrate = Migrate(app=app, db=db)
 manager.add_command('db', MigrateCommand)

@@ -7,8 +7,10 @@ class Configuration:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'adau fagkfa821b 32bdc^!$@sad'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     # general email configuration
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') or '@gmail.com'
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or 'n/a'
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') 
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') 
+    MAIL_USE_TLS = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
 
     @staticmethod  
     def init_app(app):
