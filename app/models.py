@@ -23,7 +23,7 @@ class Predictions(db.Model):
     def __repr__(self):
         """returns/displays an arbitrary representation of a row"""
         return "<Prediction %r %r %r %r %r %r %r %r %r>" % (self.id, self.fixture,
-    self.tipster_url, self.tipster_url, self.pick, self.confidence, self.odds, self.approved, self.sport)
+     self.tipster_url, self.pick, self.confidence, self.odds, self.approved, self.sport, self.count)
 
     def __init__(self, prediction_id, fixture, tipster_url, tipster_name, pick,
     confidence, odds, sport='', approve=False, count=0):
@@ -57,8 +57,6 @@ class PredictionsSchema(Schema):
     confidence = fields.Float()
     odds = fields.Float()
     approved = fields.Boolean()
-    home_score = fields.Integer()
-    away_score = fields.Integer()
     sport = fields.String()
     count = fields.Integer()
 
@@ -75,6 +73,8 @@ class Users(db.Model):
     password = db.Column(db.String(100))
     phone_number = db.Column(db.Integer(), nullable=True)
     admin = db.Column(db.Boolean())
+    plan = db.Column(db.String(10), nullable=True)
+    bankroll = db.Column(db.Float())
     
     def __init__(self, name, user_name, email, password, admin=False):
         self.name = name
@@ -82,6 +82,14 @@ class Users(db.Model):
         self.password = generate_password_hash(password)
         self.admin = admin
         self.user_name = user_name
+
+    def set_plan(self, plan):
+        """ Sets the plan as a string represetntations of the class name"""
+        self.plan = plan
+
+    def set_bankroll(self, bankroll):
+        """called upon once a user decides to credit his acount with cash"""
+        self.bankroll = bankroll
 
 class UsersSchema(Schema):
     """Defines the serialization and deserialization of the users class to and from dict to python object"""
@@ -92,6 +100,8 @@ class UsersSchema(Schema):
     password = fields.String()
     phone_number = fields.Integer()
     admin = fields.Boolean()
+    plan = fields.String()
+    bankroll =fields.Float()
 
     @post_load
     def make_user(self, data):
@@ -130,8 +140,23 @@ class Tipster(object):
         user = Users(name=name, user_name=user_name, email=email, password=password)
         db.session.add(user)
         db.session.commit()
-        return True
-
+        return user
+    
+    def add_prediction(self, data):
+        """add prediction"""
+        pred_id = data["prediction_id"] 
+        fixture = data["fixture"] 
+        url = data["tipster_url"] 
+        name = data["tipster_name"] 
+        pick = data["pick"]
+        confidence = data["confidence"]
+        odds = data["odds"]
+        pred_obj = Predictions(prediction_id=pred_id, fxture=fixture, tipster_url=url, tipster_name=name,
+                               pick=pick, confidence=confidence, odds=odds)
+        db.session.ad(pred_obj)
+        db.session.commit()
+        return pred_obj
+        
     def delete_sharp(self, user_obj):
         """remove a user from the database"""
         try:
@@ -143,6 +168,32 @@ class Tipster(object):
 
     def modify_sharp(self, data, user):
         """Modifies a user credentials"""
+        name = data.get('name')
+        email = data.get('email')
+        user_name = data.get('user_name')
+        password = data.get('password')
+        plan = data.get('plan')
+
+
+        if name is not None:
+            user.name = name
+        if email is not None:
+            user.email = email
+        if user_name is not None:
+            user.user_name = user_name
+        if password is not None:
+            user.password = password
+        if plan is not None:
+            user.plan = plan
+
+        db.session.commit()
+        return user
+
+    def delete_prediction(self, pred_obj):
+        """Removes a prediction object"""
+        db.session.delete(pred_obj)
+        db.session.commit()
+        return True
 
 class Plans(object):
     """the base class that models all the other plans"""
@@ -155,6 +206,13 @@ class Plans(object):
 
     def update_bank_balance(self):
         """Also to be overriden """
+
+    def place_bet(self):
+        """
+        will be responsible for consolidating all the required functions for 
+        bet placement, bet settlement and bankroll modification
+        """
+
 
 
 class TrippleOrNothing(Plans):

@@ -1,7 +1,7 @@
 """this modules blueprint view serves to only deal with the predictions endpoint"""
 from flask import request, url_for, make_response
 from ..admin.views import token_required, Users, admin_eyes
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, fields
 from . import main
 from ..models import Tipster, Predictions, PredictionsSchema
 from ..scrapper import run
@@ -10,6 +10,7 @@ from ..scrapper import run
 api = Api(main)
 tipster = Tipster()
 predschema = PredictionsSchema(many=True)
+pred_schema = PredictionsSchema()
 
 # login wrapper method:-> for receiving the security token and returning boolean
 # this method only ensures that the routes are protected against anonymous users only
@@ -19,10 +20,10 @@ predschema = PredictionsSchema(many=True)
 def default_response():
     return {'urls':
                     {
-                        'endpoint' : 'url_ednpoint'
-                        # 'Predictions': url_for(Tips, _external=True),
-                        # 'users': url_for(Users, _external=True),
-                        # 'help': url_for(Default, _external=True)
+                        'endpoint' : 'url_ednpoint url',
+                        # 'Predictions': fields.Url('Predictions', absolute=True),
+                        # 'users': fields.Url('Users', absolute=True),
+                        'help': fields.Url('Default', absolute=True)
                     }
             }
 
@@ -66,8 +67,8 @@ class Tips_id(Resource):
         pred_obj = tipster.approve_prediction(pred_obj)
         return {
                     'message': 'approved {}'.format(pred_id),
-                    "url": ""
-                }
+                    "prediction": pred_schema.dump(pred_obj).data
+                }, 201
 
     @token_required
     def get(self, current_user, pred_id):
@@ -75,7 +76,13 @@ class Tips_id(Resource):
         input: -> prediction id
         output: -> a dictionary containing the single prediction id
         """
-        return {'message': 'returned {} only'.format(pred_id)}
+        pred_obj = Predictions.query.filter_by(id=pred_id).first()
+        if pred_obj is None:
+            return {'message': 'prediction not found'}, 404
+
+        return {"message": "Success",
+                "prediction": pred_schema.dump(pred_obj).data
+                }, 200
 
     @token_required
     @admin_eyes
@@ -84,9 +91,11 @@ class Tips_id(Resource):
         input: -> encoded secret key with the predictions prediction_id
         output: -> message"""
         pred_obj = Predictions.query.filter_by(id=pred_id).first()
-        db.session.remove(pred_obj)
-        db.session.commit(0)
-        return {'message': 'Prediction deleted'}
+        done = tipster.delete_prediction(pred_obj)
+        if done:
+            return {'message': 'Prediction deleted'}
+        else:
+            return { "message": "Prediction Not modified"}, 304
 
     
 class Tips(Resource):
@@ -101,7 +110,13 @@ class Tips(Resource):
         input: -> diction from scrapped data
         output -> urls for the created resource; serialized object"""
         data = request.get_json()
-        return {'message': 'Prediction created successfully'}
+        try:
+            pred_obj = tipster.add_prediction(data)
+        except:
+            return {"prediction_id": "", "fixture":"", "tipster_url":"", "tipster_name":"", "pick":"",
+                "confidence": "", "odds": ""}, 304
+        return {'message': 'Prediction created successfully',
+                "prediction": pred_schema.dump(pred_obj).data}, 201
 
     @token_required
     def get(self, current_user):
@@ -109,17 +124,16 @@ class Tips(Resource):
         input: -> nothing
         output: -> a dictionary of lists"""
         if not current_user:
-            return {'message': 'Authorization error, please recheck your token'}
+            return {'message': 'Authorization error, please recheck your token'}, 401
         # run()
         predictions = Predictions.query.all()
         list_ = []
         for prediction in predictions:
             list_.append(prediction)
-        run()
         result = predschema.dump(list_)
         return {'predictions': result.data}
 
 
 
-api.add_resource(Tips_id, '/predictions/<string:pred_id>')
+api.add_resource(Tips_id, '/predictions/<string:pred_id>' )
 api.add_resource(Tips, '/predictions/')

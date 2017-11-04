@@ -1,0 +1,21 @@
+<DOCTYPE html>
+    <head>
+
+    </head>
+    <body>
+        <table>
+            <tr>
+                <th>Fixture</th>
+                <th>pick</th>
+                <th>Odds</th>
+            </tr>
+            {%for prediction in predictions%}
+                <tr>
+                    <td>{{prediction.fixture}}</td>
+                    <td>{{prediction.pick}}</td>
+                    <td>{{prediction.Odds}}</td>
+                </tr>
+            {%endfor%}
+        </table>
+    </body>
+</DOCTYPE>

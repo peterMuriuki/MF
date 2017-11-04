@@ -1,5 +1,6 @@
 """ declare the application factory (create_app method)"""
 from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
 from flask_mail import Mail
 from flask_moment import Moment
 from flask import Flask
@@ -9,6 +10,7 @@ from config import config
 mail = Mail()
 moment = Moment()
 db = SQLAlchemy()
+ma = Marshmallow()
 
 
 def create_app(configuration_name):
@@ -22,6 +24,7 @@ def create_app(configuration_name):
     mail.init_app(app)
     moment.init_app(app)
     db.init_app(app)
+    ma.init_app(app)
 
     from .main import main
     from .admin import user

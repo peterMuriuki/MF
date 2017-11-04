@@ -15,6 +15,7 @@ from functools import wraps
 tipster = Tipster()
 api = Api(user)
 userschema = UsersSchema(many=True)
+user_schema = UsersSchema()
 
 
 def token_required(f):
@@ -27,7 +28,7 @@ def token_required(f):
         if 'x-access-token' in request.headers:
             token = request.headers['x-access-token']
         if not token:
-            return {'message': 'Token is missing'}
+            return {'message': 'Token is missing'}, 401
         try:
             key = app.config['SECRET_KEY']
             data = jwt.decode(token, key)
@@ -35,7 +36,7 @@ def token_required(f):
             if user is None:
                 raise Exception('user is None')
         except:
-            return {'message': 'Token is invalid'}
+            return {'message': 'Token is invalid'}, 401
         return f(user, *args, **kwargs)
     return decorated
 
@@ -50,7 +51,7 @@ def admin_eyes(f):
         if 'x-access-token' in request.headers:
             token = request.headers['x-access-token']
         if not token:
-            return {'message': 'Token is missing'}
+            return {'message': 'Token is missing'}, 401
         try:
             key = app.config['SECRET_KEY']
             data = jwt.decode(token, key)
@@ -58,10 +59,10 @@ def admin_eyes(f):
             if user is None:
                 raise Exception('user is None')
         except:
-            return {'message': 'Token is invalid'}
+            return {'message': 'Token is invalid'}, 401
         if user.admin:
             return f(*args, **kwargs)
-        return {'message': 'Method is not allowed'}
+        return {'message': 'Method is not allowed'}, 405
     return decorated
 
 
@@ -97,7 +98,7 @@ class Register(User):
         """
         data = request.get_json()
         try:
-            yes = tipster.add_sharp(data)
+            user = tipster.add_sharp(data)
         except KeyError:
             return {'message': 'error with the keys', 'sample':
                 {
@@ -105,11 +106,11 @@ class Register(User):
                     "email": "<email>",
                     "user_name": "<user_name>",
                     "password": "<password>"
-                }}
-        if yes:
+                }}, 401
+        if user:
             return {'message': 'successfully added',
-                    'url': ''
-            }
+                    'user': user_schema(user).data
+            }, 201
 
 
 
@@ -141,7 +142,7 @@ class Single(User):
         """classified owner's eyes only"""
         if current_user.id != user_id:
             # check that the logged in user is the same as the one authenticated
-            return {'message': 'Method not allowed'}, 503
+            return {'message': 'Method not allowed'}, 405
         user = Users.query.filter_by(id=user_id).first()
         if not user:
             return {'message': 'user not found'}, 404
@@ -179,40 +180,44 @@ class RERegister(User):
             # means we are promoting user
             if not current_user.admin:
                 current_user.admin = True
-                return {'message': 'user succesfully modified',
-                    'url': '',
-                    'user_details': ''
+                return {'message': 'user successfully modified',
+                    'user': user_schema(current_user).data
                     }
             else:
                 current_user.admin = False
                 return {'message': 'user succesfully modified',
-                    'url': '',
-                    'user_details': ''
+                    'user': user_schema(current_user).data
                     }
         if user.id != current_user.id:
-            return {'message': 'Method not allowed'}
+            return {'message': 'Method not allowed'}, 405
         data = request.get_json()
         # we know just modify the new information
-        response = tipster.modify_sharp(data)
-        if response:
-            return {'message': 'user succesfully modified',
-                    'url': '',
-                    'user_details': ''
+        response_obj = tipster.modify_sharp(data, current_user)
+        if response_obj:
+            return {'message': 'user successfully modified',
+                    'user': user_schema(response_obj).data
                     }
         else:
-            return {'message': 'ERROR: user not modified'}
+            return {'message': 'error with the keys', 'sample':
+                {
+                    "name": "<name>",
+                    "email": "<email>",
+                    "user_name": "<user_name>",
+                    "password": "<password>",
+                    "plan": "<plan>"
+                }}, 304
 
     @admin_eyes
     def delete(self, user, user_id):
         """admin_eyes and accounts owner eyes only"""
         current_user = Users.query.filter_by(id=user_id).first()
         if user.id != current_user.id or not user.admin:
-            return {'message': 'Method not allowed'}
+            return {'message': 'Method not allowed'}, 405 
         done = tipster.delete_sharp(user)
         if done:
             return {'message': 'user deleted'}
         else:
-            return {'message': 'user not deleted'}
+            return {'message': 'user not deleted'}, 304
 
 
 api.add_resource(Register, '/register')

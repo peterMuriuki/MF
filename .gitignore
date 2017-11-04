@@ -5,3 +5,10 @@ app/main/__pycache__/
 app/__pycache__/
 files/
 !/files/
+tests/__pycahce__/
+.env.develop
+.env.test
+/.cache/
+tests/__pycache__/
+/testit.py
+migrations/__pycache__/

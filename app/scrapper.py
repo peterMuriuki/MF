@@ -104,6 +104,18 @@ def over_under(string):
         return True
     return False
 
+def find_all(pattern, string):
+    """"""
+    count, start, index = 0, 0, 0
+    while index <= len(string):
+        index = string.find(pattern, start, len(string))
+        if index < 0:
+            return count
+        else:
+            count += 1
+            start  = index + len(pattern)
+    return count
+
 
 def all_tips_occurrence_checker(diction):
     """input: dictionary with the key 'all' that contains a list that has the scrapped and formatted data
@@ -116,7 +128,7 @@ def all_tips_occurrence_checker(diction):
     for diction in data_list:
         temp_string = diction['fixture'] + diction['pick']
         check_string += temp_string
-    for diction in diction['all']:
+    for diction in data_list:
         temp_string = diction['fixture'] + diction['pick']
         count = len(re.findall(temp_string, check_string))
         diction['count'] = count
@@ -144,12 +156,12 @@ def parse_table_rows(tr_list):
         temp_diction = {}
         td_list = tr.find_all('td')
         # validating the number of tds in that we have just captured
-        if len(td_list) != 9:
+        if len(td_list) > 9 and len(td_list) < 8:
             raise Exception('Problem getting the table data')
         # tipster details in the first td
         first_td = td_list[0]
-        tipster_url = 'http://www.typersi.com/' + first_td.a.get('href')
-        tipster_name = first_td.a.get_text()
+        tipster_url = 'http://www.typersi.com/' + first_td.a.get('href').strip()
+        tipster_name = first_td.a.get_text().strip()
         # timing functionality
         second_td = td_list[1]
         time_as_string = second_td.get_text()
@@ -164,15 +176,18 @@ def parse_table_rows(tr_list):
         # the pick
         fourth_td = td_list[3]
         if len(re.findall(r'\d', fourth_td.get_text())) > 0:
-            pick = str(fourth_td.get_text())
+            pick = str(fourth_td.get_text()).strip()
         else:
             pick = str(fourth_td.get_text().strip(' '))
         # the proposed stake
-        fifth_td = td_list[4]
+        try:
+            fifth_td = td_list[4]
+        except IndexError:
+            print(td_list)
         proposed_stake = fifth_td.get_text()
         stake_as_float = float(proposed_stake)
         confidence = stake_as_float / 30.0 * 100
-        confidence = confidence
+        confidence = round(confidence)
         # now to a very important part to the odds
         sixth_td = td_list[5]
         odds_as_string = sixth_td.get_text()
