@@ -20,10 +20,10 @@ pred_schema = PredictionsSchema()
 def default_response():
     return {'urls':
                     {
-                        'endpoint' : 'url_ednpoint url',
+                        'endpoint' : 'url_ednpoint url'
                         # 'Predictions': fields.Url('Predictions', absolute=True),
                         # 'users': fields.Url('Users', absolute=True),
-                        'help': fields.Url('Default', absolute=True)
+                        # 'help': fields.Url('Default', absolute=True)
                     }
             }
 
