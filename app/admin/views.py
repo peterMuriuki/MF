@@ -166,7 +166,10 @@ class Login(User):
         if not user:
             login_failed()
         if check_password_hash(user.password, auth.password):
-            token = jwt.encode({'user_id': user.id, 'exp': dt.datetime.utcnow() + dt.timedelta(hours=1)}, app.config['SECRET_KEY'])
+            if not user.admin:
+                token = jwt.encode({'user_id': user.id, 'exp': dt.datetime.utcnow() + dt.timedelta(hours=1)}, app.config['SECRET_KEY'])
+            else:
+                token = jwt.encode({'user_id': user.id}, app.config['SECRET_KEY'])
             return jsonify({'token': token.decode("UTF-8")})
         return login_failed()
 
