@@ -10,6 +10,11 @@ from flask_restful import Resource, Api
 from . import user
 from ..models import Tipster, Users, UsersSchema
 from functools import wraps
+try:
+    from manage import app
+except ImportError:
+    import sys
+    app = sys.modules[__package__ + '.app']
 
 tipster = Tipster()
 api = Api(user)
@@ -226,5 +231,3 @@ api.add_resource(Register, '/register')
 api.add_resource(RERegister, '/<int:user_id>')
 api.add_resource(Login, '/login')
 
-
-from manage import app
