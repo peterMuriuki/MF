@@ -12,14 +12,16 @@ from ..models import Tipster, Users, UsersSchema
 from functools import wraps
 try:
     from manage import app
+    key = app.config['SECRET_KEY']
 except ImportError:
-    import sys
-    app = sys.modules[__package__ + '.app']
+    key = "Not secure"
 
 tipster = Tipster()
 api = Api(user)
 userschema = UsersSchema(many=True)
 user_schema = UsersSchema()
+
+
 
 
 def token_required(f):
@@ -34,7 +36,6 @@ def token_required(f):
         if not token:
             return {'message': 'Token is missing'}, 401
         try:
-            key = app.config['SECRET_KEY']
             data = jwt.decode(token, key)
             user = Users.query.filter_by(id=data['user_id']).first()
             if user is None:
@@ -57,7 +58,6 @@ def admin_eyes(f):
         if not token:
             return {'message': 'Token is missing'}, 401
         try:
-            key = app.config['SECRET_KEY']
             data = jwt.decode(token, key)
             user = Users.query.filter_by(id=data['user_id']).first()
             if user is None:
@@ -171,9 +171,9 @@ class Login(User):
             login_failed()
         if check_password_hash(user.password, auth.password):
             if not user.admin:
-                token = jwt.encode({'user_id': user.id, 'exp': dt.datetime.utcnow() + dt.timedelta(hours=1)}, app.config['SECRET_KEY'])
+                token = jwt.encode({'user_id': user.id, 'exp': dt.datetime.utcnow() + dt.timedelta(hours=1)}, key['SECRET_KEY'])
             else:
-                token = jwt.encode({'user_id': user.id}, app.config['SECRET_KEY'])
+                token = jwt.encode({'user_id': user.id}, key['SECRET_KEY'])
             return jsonify({'token': token.decode("UTF-8")})
         return login_failed()
 
