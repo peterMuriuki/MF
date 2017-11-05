@@ -1,1 +1,1 @@
-worker: python manage.py runserver 5000
+worker: python manage.py runserver 

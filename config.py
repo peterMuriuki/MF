@@ -24,7 +24,7 @@ class MiddleWare(Configuration):
 
 
 class DevelopmentConfiguration(MiddleWare):
-    DEBUG = True
+    DEBUG = False
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_base_uri, 'development.db')
 
 
