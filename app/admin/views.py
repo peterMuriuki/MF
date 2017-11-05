@@ -9,7 +9,6 @@ from werkzeug.security import check_password_hash
 from flask_restful import Resource, Api
 from . import user
 from ..models import Tipster, Users, UsersSchema
-from manage import app
 from functools import wraps
 
 tipster = Tipster()
@@ -227,3 +226,5 @@ api.add_resource(Register, '/register')
 api.add_resource(RERegister, '/<int:user_id>')
 api.add_resource(Login, '/login')
 
+
+from manage import app
