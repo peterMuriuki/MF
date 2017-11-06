@@ -125,7 +125,7 @@ class Tips(Resource):
         output: -> a dictionary of lists"""
         if not current_user:
             return {'message': 'Authorization error, please recheck your token'}, 401
-        # run()
+        run()
         predictions = Predictions.query.all()
         list_ = []
         for prediction in predictions:
