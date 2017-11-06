@@ -1,4 +1,4 @@
-""" declare the application factory (create_app method)"""
+"""  declare the application factory (create_app method)"""
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_mail import Mail
