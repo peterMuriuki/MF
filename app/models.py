@@ -153,7 +153,7 @@ class Tipster(object):
         odds = data["odds"]
         pred_obj = Predictions(prediction_id=pred_id, fixture=fixture, tipster_url=url, tipster_name=name,
                                pick=pick, confidence=confidence, odds=odds)
-        db.session.ad(pred_obj)
+        db.session.add(pred_obj)
         db.session.commit()
         return pred_obj
         
