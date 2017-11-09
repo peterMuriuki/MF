@@ -2,13 +2,14 @@
 from . import db
 from werkzeug.security import generate_password_hash
 from marshmallow import fields, Schema, post_load
+from datetime import datetime
 
 
 class Predictions(db.Model):
     __table_name__ = "predictions"
     id = db.Column(db.Integer(), primary_key=True)
     prediction_id = db.Column(db.String(), unique=True)
-	date_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    date_time = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
     fixture = db.Column(db.String(100))
     tipster_url = db.Column(db.String(64))
     tipster_name = db.Column(db.String(64))
@@ -26,11 +27,11 @@ class Predictions(db.Model):
         return "<Prediction %r %r %r %r %r %r %r %r %r %r>" % (self.id, self.date_time, self.fixture,
      self.tipster_url, self.pick, self.confidence, self.odds, self.approved, self.sport, self.count)
 
-    def __init__(self, prediction_id, time, fixture, tipster_url, tipster_name, pick,
+    def __init__(self, prediction_id, _time, fixture, tipster_url, tipster_name, pick,
     confidence, odds, sport='', approve=False, count=0):
         self.prediction_id = prediction_id
         self.fixture = fixture
-		self.date_time = time
+        self.date_time = _time
         self.tipster_url = tipster_url
         self.tipster_name = tipster_name
         self.pick = pick
