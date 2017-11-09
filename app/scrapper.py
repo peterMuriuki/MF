@@ -1,8 +1,8 @@
+""" check the cout issue and parse data function"""
 """
  Home Page: typersi.com Areas of interests
     picks from tipsters with the best efficiency -> high precedence
     most repeated predictions from the general full all predictions page
-
     This module is the toolbox of all scrapping and organisation of return data which
     will be mostly inform of basic python objects -> mostly dictionary
  """
@@ -54,6 +54,7 @@ def get_picks_from_tipsters_with_the_best_efficiency(soup):
     tr_list = tbody.find_all('tr')
     data_list = parse_table_rows(tr_list)
     _response = {"efficient": data_list}
+    save_prediction(data_list)
     return _response
 
 
@@ -206,11 +207,17 @@ def parse_table_rows(tr_list):
         temp_diction['confidence'] = confidence
         temp_diction['odds'] = odds
         temp_diction = prediction_id_generator(temp_diction)
-        if instance_unique_checker(temp_diction['prediction_id']):
-            tipster.add_prediction(temp_diction)
         return_list.append(temp_diction)
     return return_list
 
+  
+def save_prediction(data):
+    """The workaround, the functions incharge of requesting the respecive data will also be incharge of saving the predictions"""
+    # this function should work for many dictionaries or even one dictioary instanceif
+    for diction in data:
+        if instance_unique_checker(diction):
+            tipster.add_prediction(diction)
+    return True
 
 def prediction_id_generator(diction):
     """input: dict object.
