@@ -215,7 +215,7 @@ def save_prediction(data):
     """The workaround, the functions incharge of requesting the respecive data will also be incharge of saving the predictions"""
     # this function should work for many dictionaries or even one dictioary instanceif
     for diction in data:
-        if instance_unique_checker(diction):
+        if instance_unique_checker(diction['prediction_id']):
             tipster.add_prediction(diction)
     return True
 
