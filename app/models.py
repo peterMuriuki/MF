@@ -8,6 +8,7 @@ class Predictions(db.Model):
     __table_name__ = "predictions"
     id = db.Column(db.Integer(), primary_key=True)
     prediction_id = db.Column(db.String(), unique=True)
+	date_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     fixture = db.Column(db.String(100))
     tipster_url = db.Column(db.String(64))
     tipster_name = db.Column(db.String(64))
@@ -22,13 +23,14 @@ class Predictions(db.Model):
 
     def __repr__(self):
         """returns/displays an arbitrary representation of a row"""
-        return "<Prediction %r %r %r %r %r %r %r %r %r>" % (self.id, self.fixture,
+        return "<Prediction %r %r %r %r %r %r %r %r %r %r>" % (self.id, self.date_time, self.fixture,
      self.tipster_url, self.pick, self.confidence, self.odds, self.approved, self.sport, self.count)
 
-    def __init__(self, prediction_id, fixture, tipster_url, tipster_name, pick,
+    def __init__(self, prediction_id, time, fixture, tipster_url, tipster_name, pick,
     confidence, odds, sport='', approve=False, count=0):
         self.prediction_id = prediction_id
         self.fixture = fixture
+		self.date_time = time
         self.tipster_url = tipster_url
         self.tipster_name = tipster_name
         self.pick = pick
@@ -53,6 +55,7 @@ class PredictionsSchema(Schema):
     prediction_id = fields.String()
     fixture = fields.String()
     tipster_url = fields.String()
+	# date_time = fields.string()
     pick = fields.String()
     confidence = fields.Float()
     odds = fields.Float()
@@ -113,8 +116,8 @@ class Tipster(object):
 
     def add_prediction(self, diction):
         """creates a single instance of a prediction and commits it to the database"""
-        pred_id, h_t, t_u, t_n, pick, con, odds = diction['prediction_id'], diction['fixture'], diction['tipster_url'], diction['tipster_name'], diction['pick'], diction['confidence'], diction['odds']
-        prediction_obj = Predictions(pred_id, h_t, t_u, t_n, pick, con, odds)
+        pred_id, t, h_t, t_u, t_n, pick, con, odds = diction['prediction_id'], diction['time_of_play'], diction['fixture'], diction['tipster_url'], diction['tipster_name'], diction['pick'], diction['confidence'], diction['odds']
+        prediction_obj = Predictions(pred_id, t, h_t, t_u, t_n, pick, con, odds)
         db.session.add(prediction_obj)
         db.session.commit()
 

@@ -201,7 +201,7 @@ def parse_table_rows(tr_list):
             result = None
         temp_diction['tipster_url'] = tipster_url
         temp_diction['tipster_name'] = tipster_name
-        temp_diction['time_of_play'] = time_of_play.__str__()
+        temp_diction['time_of_play'] = time_of_play
         temp_diction['fixture'] = fixture
         temp_diction['pick'] = pick
         temp_diction['confidence'] = confidence
