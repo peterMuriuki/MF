@@ -113,7 +113,7 @@ class Register(User):
                 }}, 401
         if user:
             return {'message': 'successfully added',
-                    'user': user_schema(user).data
+                    'user': user_schema.dump(user).data
             }, 201
 
 
@@ -188,12 +188,12 @@ class RERegister(User):
             if not current_user.admin:
                 current_user.admin = True
                 return {'message': 'user successfully modified',
-                    'user': user_schema(current_user).data
+                    'user': user_schema.dump(current_user).data
                     }
             else:
                 current_user.admin = False
                 return {'message': 'user succesfully modified',
-                    'user': user_schema(current_user).data
+                    'user': user_schema.dump(current_user).data
                     }
         if user.id != current_user.id:
             return {'message': 'Method not allowed'}, 405
@@ -202,7 +202,7 @@ class RERegister(User):
         response_obj = tipster.modify_sharp(data, current_user)
         if response_obj:
             return {'message': 'user successfully modified',
-                    'user': user_schema(response_obj).data
+                    'user': user_schema.dump(response_obj).data
                     }
         else:
             return {'message': 'error with the keys', 'sample':

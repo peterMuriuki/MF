@@ -21,7 +21,7 @@ def get_home_page(text=False, file=None):
         home_url = 'http://www.typersi.com'
         index_html = requests.get(home_url).text
     else:
-        # readfiles and return text
+        # read files and return text
         file_handler = open(file, 'r')
         contents = file_handler.read()
         index_html = contents
