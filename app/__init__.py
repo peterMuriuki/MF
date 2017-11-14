@@ -26,8 +26,8 @@ def create_app(configuration_name):
     db.init_app(app)
     ma.init_app(app)
 
-    from .main import main
-    from .admin import user
+    from .main.views import main
+    from .admin.views import user
     app.register_blueprint(main)
     app.register_blueprint(user, url_prefix='/users')
 

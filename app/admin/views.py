@@ -1,3 +1,7 @@
+from flask import Blueprint
+
+user = Blueprint('user', __name__)
+
 """
 This module abstracts user functions and separates them from normal tipster actions such as those
 in the main blueprint
@@ -7,7 +11,6 @@ import jwt
 import datetime as dt
 from werkzeug.security import check_password_hash
 from flask_restful import Resource, Api
-from . import user
 from ..models import Tipster, Users, UsersSchema
 from functools import wraps
 try:

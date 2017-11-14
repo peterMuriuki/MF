@@ -2,10 +2,12 @@
 from flask import request, url_for, make_response
 from ..admin.views import token_required, Users, admin_eyes
 from flask_restful import Resource, Api, fields
-from . import main
 from ..models import Tipster, Predictions, PredictionsSchema
 from ..scrapper import run
+from flask import Blueprint
 
+
+main = Blueprint('main', __name__)
 
 api = Api(main)
 tipster = Tipster()
