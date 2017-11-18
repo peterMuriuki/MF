@@ -2,8 +2,7 @@
 to admin - > new tips
 to all users -> A new approved tip"""
 from . import mail
-from manage import app
-from flask import render_template
+from flask import render_template, current_app
 from flask_mail import Message
 from threading import Thread
 
@@ -23,6 +22,7 @@ def send_email(subject, sender, recipients, text_body, html_body):
     msg = Message(subject=subject,sender=sender,recipients=recipients)
     msg.body = text_body
     msg.html = html_body
+    app = current_app._get_current_object()
     send_async_email(app, msg)
 
 
@@ -49,13 +49,13 @@ class ToAdmin(object):
             """.format(user_obj.name, user_obj.user_name, user_obj.email)
         subject = "(Hooray)NEW USER"
         html_body = render_template('email/new_user.html', user_obj)
-        send_email(subject, app.config['MAIL_USERNAME'], 'wpmuriuki1@gmail.com', message, html_body)
+        send_email(subject, app.config['MAIL_USERNAME'], 'FLASKY['WEBMASTER']', message, html_body)
         return True
 
     def error(self, error_message):
         """Forwards an error message ot administrator"""
         subject = "SHIT"
-        send_email(subject, app.config['MAIL_USERNAME'], 'wpmuriuki1@gmail.com', error_message, error_message)
+        send_email(subject, app.config['MAIL_USERNAME'], 'FLASKY['WEBMASTER']', error_message, error_message)
         return True
 
     def new_prediction(self, predictions):

@@ -11,6 +11,8 @@ class Configuration:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') 
     MAIL_USE_TLS = True
     SQLALCHEMY_TRACK_MODIFICATIONS = True
+    # email to which the application can report to in regard to issues that concern the Admin
+    WEBMASTER = os.environ.get('WEBMASTER')
 
     @staticmethod  
     def init_app(app):
@@ -24,7 +26,7 @@ class MiddleWare(Configuration):
 
 
 class DevelopmentConfiguration(MiddleWare):
-    DEBUG = False
+    DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_base_uri, 'development.db')
 
 

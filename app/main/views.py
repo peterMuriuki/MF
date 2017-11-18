@@ -22,10 +22,10 @@ pred_schema = PredictionsSchema()
 def default_response():
     return {'urls':
                     {
-                        'endpoint' : 'url_ednpoint url'
-                        # 'Predictions': fields.Url('Predictions', absolute=True),
-                        # 'users': fields.Url('Users', absolute=True),
-                        # 'help': fields.Url('Default', absolute=True)
+                        'endpoint' : 'url_ednpoint url',
+                        'Predictions': url_for('main.tips', _external=True),
+                        'users': url_for('user.many', _external=True),
+                        'help': url_for('main.default', _external=True)
                     }
             }
 
@@ -127,8 +127,14 @@ class Tips(Resource):
         output: -> a dictionary of lists"""
         if not current_user:
             return {'message': 'Authorization error, please recheck your token'}, 401
+        # run scrapper before the predictions are returned otherwise the predictions returned will not include the latest updates
         run()
-        predictions = Predictions.query.all()
+        from datetime import date as dt
+        from datetime import datetime as cal
+        date = dt.today()
+        today = cal(date.year, date.month, date.day, 0, 0, 0)
+        # so that we can only get the predictions whose added time is greater than the start of the day.
+        predictions = Predictions.query.filter_by(date_time >= today).all()
         list_ = []
         for prediction in predictions:
             list_.append(prediction)

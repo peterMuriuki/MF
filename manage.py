@@ -1,6 +1,6 @@
 """ Launch Script"""
 from flask_script import Manager, Shell
-from flask_migrate import Migrate, MigrateCommand
+from flask_migrate import Migrate, MigrateCommand, upgrade
 from app import create_app, db
 import os
 
@@ -15,6 +15,12 @@ def make_shell_context():
     return dict(app=app, db=db)
 
 manager.add_command('shell', Shell(make_context=make_shell_context))
+
+@manager.command
+def deploy():
+    """Define all the deploy operations once and in a encapsulated manner """
+    # create the tables
+    upgrade()
 
 
 if __name__ == '__main__':

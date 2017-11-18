@@ -1,30 +1,26 @@
-from flask import Blueprint
-
-user = Blueprint('user', __name__)
-
 """
 This module abstracts user functions and separates them from normal tipster actions such as those
 in the main blueprint
 """
-from flask import request, make_response, jsonify
+from flask import Blueprint
+
+user = Blueprint('user', __name__)
+
+
+from flask import request, make_response, jsonify, current_app
 import jwt
 import datetime as dt
 from werkzeug.security import check_password_hash
 from flask_restful import Resource, Api
 from ..models import Tipster, Users, UsersSchema
 from functools import wraps
-try:
-    from manage import app
-    key = app.config['SECRET_KEY']
-except ImportError:
-    key = "Not secure"
 
+
+# a few gloabls 
 tipster = Tipster()
 api = Api(user)
 userschema = UsersSchema(many=True)
 user_schema = UsersSchema()
-
-
 
 
 def token_required(f):
@@ -33,6 +29,8 @@ def token_required(f):
         """
         returns an instance of the user class else returns a None object if the user is not found
         """
+        app = current_app._get_current_object()
+        key = app.config['SECRET_KEY']
         token = False
         if 'x-access-token' in request.headers:
             token = request.headers['x-access-token']
@@ -55,6 +53,8 @@ def admin_eyes(f):
         """
         returns an instance of the user class else returns a None object if the user is not found
         """
+        app = current_app._get_current_object()
+        key = app.config['SECRET_KEY']
         token = False
         if 'x-access-token' in request.headers:
             token = request.headers['x-access-token']
@@ -164,8 +164,11 @@ class Login(User):
     """authenticate a person and return a token for future authentications
     input: an accounts credentials: username and Password
     output: a serialized token string"""
+    
     def post(self):
         auth = request.authorization
+        app = current_app._get_current_object()
+        key = app.config['SECRET_KEY']
 
         if not auth or not auth.username or not auth.password:
             login_failed()
