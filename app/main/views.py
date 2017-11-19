@@ -16,7 +16,7 @@ pred_schema = PredictionsSchema()
 
 # login wrapper method:-> for receiving the security token and returning boolean
 # this method only ensures that the routes are protected against anonymous users only
-# the admin_only decorator will return true or false based on whether the current user is an admin
+# the admin_only decorator will restrict the view function to admin only.
 
 
 def default_response():

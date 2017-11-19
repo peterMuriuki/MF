@@ -115,13 +115,6 @@ class Tipster(object):
     """toolboc for all methods and functions for manipulating the predictions"""
     # each method's data transactions should be atomic
 
-    def add_prediction(self, diction):
-        """creates a single instance of a prediction and commits it to the database"""
-        pred_id, t, h_t, t_u, t_n, pick, con, odds = diction['prediction_id'], diction['time_of_play'], diction['fixture'], diction['tipster_url'], diction['tipster_name'], diction['pick'], diction['confidence'], diction['odds']
-        prediction_obj = Predictions(pred_id, t, h_t, t_u, t_n, pick, con, odds)
-        db.session.add(prediction_obj)
-        db.session.commit()
-
     def approve_prediction(self, prediction_obj):
         """ calls the confirm method from the parsed in prediction_obj"""
         prediction_obj.approve()
@@ -156,8 +149,9 @@ class Tipster(object):
         confidence = data["confidence"]
         odds = data["odds"]
         _time = data['time_of_play']
+        count = data['count']
         pred_obj = Predictions(prediction_id=pred_id, _time=_time, fixture=fixture, tipster_url=url, tipster_name=name,
-                               pick=pick, confidence=confidence, odds=odds)
+                               pick=pick, confidence=confidence, odds=odds, count=count)
         db.session.add(pred_obj)
         db.session.commit()
         return pred_obj

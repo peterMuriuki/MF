@@ -1,4 +1,3 @@
-""" check the cout issue and parse data function"""
 """
  Home Page: typersi.com Areas of interests
     picks from tipsters with the best efficiency -> high precedence
@@ -53,6 +52,9 @@ def get_picks_from_tipsters_with_the_best_efficiency(soup):
     tbody = desired_table.tbody
     tr_list = tbody.find_all('tr')
     data_list = parse_table_rows(tr_list)
+    # add count
+    for diction in data_list:
+        diction['count'] = 0
     _response = {"efficient": data_list}
     save_prediction(data_list)
     return _response
@@ -83,15 +85,12 @@ def get_all_other_tips(file=None):
             page_text = file_handler.read()
 
     soup = BeautifulSoup(page_text, 'html.parser')
-    # eff_table = get_efficient_table(soup)
-    # desired_table = eff_table.next_sibling.next_sibling.next_sibling.next_sibling - > for the usual unlabeled home page table
-    # we need to redefine how to get the desired table
     desired_table = get_all_tips_desired_table(soup)
     tbody = desired_table.tbody
     tr_list = tbody.find_all('tr')
     data_list = parse_table_rows(tr_list)
-    _response = {"all": data_list}
-    return _response
+    all_other_tips_compiler(data_list) 
+    return {"all":data_list}
 
 
 def over_under(string):
@@ -118,33 +117,31 @@ def find_all(pattern, string):
     return count
 
 
-def all_tips_occurrence_checker(diction):
-    """input: dictionary with the key 'all' that contains a list that has the scrapped and formatted data
-    output: a dictionary with a key value that denotes the value """
+def all_tips_occurrence_checker(data_list):
+    """input:  list that has the scrapped and formatted data
+    output: a list of dictionaries with a key count value that denotes the value """
     # i think several picks can be saying the same thing in a different way and they should
     # compiled so that the physical representation does not harbour this process
     check_string = ''
-    # diction = json_response
-    data_list = diction['all']
     for diction in data_list:
         temp_string = diction['fixture'] + diction['pick']
         check_string += temp_string
     for diction in data_list:
         temp_string = diction['fixture'] + diction['pick']
-        count = len(re.findall(temp_string, check_string))
+        count = find_all(temp_string, check_string)
         diction['count'] = count
         if over_under(diction['pick']):
-            diction['count'] = len(diction['all'])
-    return diction
+            diction['count'] = len(data_list)
+    return data_list
 
 
-def all_other_tips_compiler(soup):
-    """will be in-charge of looking at the dictionaries that have the count key and retrieve those with a count greater
+def all_other_tips_compiler(data_list):
+    """
+    Input : data_list: a list of dictionaries
+    will be in-charge of looking at the dictionaries that have the count key and retrieve those with a count greater
     than one"""
-    dict_response = get_all_other_tips(soup)
-    doi = all_tips_occurrence_checker(dict_response)  # doi dictionary of interest
-    data_list = doi['all']
-    for diction in data_list:
+    doi = all_tips_occurrence_checker(data_list)  #  list of interest
+    for diction in doi:
         if diction['count'] > 1 and instance_unique_checker(diction['prediction_id']):
             tipster.add_prediction(diction)
     return True
@@ -213,7 +210,7 @@ def parse_table_rows(tr_list):
   
 def save_prediction(data):
     """The workaround, the functions incharge of requesting the respecive data will also be incharge of saving the predictions"""
-    # this function should work for many dictionaries or even one dictioary instanceif
+    # this function should work for many dictionaries or even one dictioary instance
     for diction in data:
         if instance_unique_checker(diction['prediction_id']):
             tipster.add_prediction(diction)
@@ -241,15 +238,6 @@ def instance_unique_checker(pred_id):
         return False
     elif response is None:
         return True
-
-
-def get_optimum_three(soup):
-    """I think there is a side of this that i think we are not considering,.. instead of randomly picking
-    fixtures whose odds are going to line up with our target how about picking these fixtures from a more specialised
-    pool. A pool that we have also filtered through"""
-    # input is from the tipsters with the best efficiency
-    pass
-
 
 def time_splitter(string):
     """This function will deive the hour and minutes that a game will be played from a string

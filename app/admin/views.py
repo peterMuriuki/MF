@@ -234,4 +234,3 @@ class RERegister(User):
 api.add_resource(Register, '/register')
 api.add_resource(RERegister, '/<int:user_id>')
 api.add_resource(Login, '/login')
-

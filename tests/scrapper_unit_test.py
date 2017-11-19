@@ -1,7 +1,7 @@
 """test secondary functions. the native functions  that enable the high level functions work"""
 import unittest
 
-class ScrapTests(unittest.Testcase):
+class ScrapTests(unittest.TestCase):
     """refer to module documentation"""
   
     def test_find_all(self):
