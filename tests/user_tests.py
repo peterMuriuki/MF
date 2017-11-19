@@ -1,5 +1,6 @@
 import pytest
-from flask import json
+from flask import json, url_for
+from . import Users, create_app, db
 
 
 def setup_module(module):
@@ -17,7 +18,7 @@ def teardown_module(module):
     db.drop_all()
 
 
-def test_registration(self):
+def test_registration():
     """works properly  against devoid information and responds with the required info
     test ->  post data"""
     data = {
@@ -26,9 +27,14 @@ def test_registration(self):
         "user_name": "",
         "password": ""
     }
-    response = client.post(, data=data)  # how the fuck am i going to work with routes when i have abstracted taht part of the code to flask-restful
+    response = client.post(url_for('user.register'), data=data) 
     assert(response.status_code == 201)
     data = json.loads(response.data)
-    assert(data['message'] == "User account created succesfully"])
+    assert(data['message'] == "User account created succesfully")
     assert(data['user'] is dict)
+
+def test_registration_from_db():
+    """Test the registration mechanism from the database point of view"""
+    users = Users.query.all()
+    assert(len(users))
 

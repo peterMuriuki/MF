@@ -124,9 +124,8 @@ class Tips(Resource):
     def get(self, current_user):
         """ returns a list of the current predictions of the current day, during test return all predictions
         input: -> nothing
-        output: -> a dictionary of lists"""
-        if not current_user:
-            return {'message': 'Authorization error, please recheck your token'}, 401
+        output: -> a dictionary of lists with the key prediction. the list conatains dictionaries representing predictions instances
+        """
         # run scrapper before the predictions are returned otherwise the predictions returned will not include the latest updates
         run()
         from datetime import date as dt

@@ -69,7 +69,7 @@ def admin_eyes(f):
             return {'message': 'Token is invalid'}, 401
         if user.admin:
             return f(*args, **kwargs)
-        return {'message': 'Method is not allowed'}, 405
+        return {'message': 'User is forbidden'}, 403
     return decorated
 
 
@@ -113,9 +113,9 @@ class Register(User):
                     "email": "<email>",
                     "user_name": "<user_name>",
                     "password": "<password>"
-                }}, 401
+                }}, 400
         if user:
-            return {'message': 'successfully added',
+            return {'message': "User account created succesfully",
                     'user': user_schema.dump(user).data
             }, 201
 
@@ -128,8 +128,6 @@ class Many(User):
     def get(self, current_user):
         """classified admin eyes only
         returns a list of all the users in the system"""
-        # if not current_user.admin:
-        #     return {'message': 'Method not allowed'}, 503
         users = Users.query.all()
         semi_list = list()
         for user in users:

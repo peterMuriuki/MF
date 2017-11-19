@@ -45,9 +45,8 @@ def test_remainder_pages_scrapper(file):
 
 def test_predictions_fields_with_count():
     """assert that there are predictions that have the count"""
-    response = Predictions.query.all()
-        
-    # response = Predictions.query.filter_by(count>2).all()
-    # assert len(response) > 0
+    response = Predictions.query.all()    
+    response = Predictions.query.filter_by(count>2).all()
+    assert len(response) > 0
 
 
