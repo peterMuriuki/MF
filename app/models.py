@@ -9,7 +9,7 @@ class Predictions(db.Model):
     __table_name__ = "predictions"
     id = db.Column(db.Integer(), primary_key=True)
     prediction_id = db.Column(db.String(), unique=True)
-    date_time = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
+    date_time = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
     fixture = db.Column(db.String(100))
     tipster_url = db.Column(db.String(64))
     tipster_name = db.Column(db.String(64))

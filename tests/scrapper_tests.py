@@ -25,8 +25,8 @@ def setup_module(module):
 
 def teardown_module(module):
     """close up and clear the database """
-    db.session.remove()
-    db.drop_all()
+    # db.session.remove()
+    # db.drop_all()
 
 
 @pytest.mark.parametrize('file',asb_files)
