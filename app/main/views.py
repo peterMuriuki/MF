@@ -133,7 +133,7 @@ class Tips(Resource):
         date = dt.today()
         today = cal(date.year, date.month, date.day, 0, 0, 0)
         # so that we can only get the predictions whose added time is greater than the start of the day.
-        predictions = Predictions.query.filter_by(date_time >= today).all()
+        predictions = Predictions.query.filter(Predictions.date_time >= today).all()
         list_ = []
         for prediction in predictions:
             list_.append(prediction)
