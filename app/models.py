@@ -27,8 +27,8 @@ class Predictions(db.Model):
         return "<Prediction %r %r %r %r %r %r %r %r %r %r>" % (self.id, self.date_time, self.fixture,
      self.tipster_url, self.pick, self.confidence, self.odds, self.approved, self.sport, self.count)
 
-    def __init__(self, prediction_id, _time, fixture, tipster_url, tipster_name, pick,
-    confidence, odds, sport='', approve=False, count=0):
+    def __init__(self, prediction_id, fixture, tipster_url, tipster_name, pick,
+    confidence, odds, _time=datetime.utcnow(), sport='', approve=False, count=0):
         self.prediction_id = prediction_id
         self.fixture = fixture
         self.date_time = _time
@@ -75,12 +75,12 @@ class Users(db.Model):
     user_name = db.Column(db.String(40))
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(100))
-    phone_number = db.Column(db.Integer(), nullable=True)
+    phone_number = db.Column(db.String(), nullable=True)
     admin = db.Column(db.Boolean())
     plan = db.Column(db.String(10), nullable=True)
     bankroll = db.Column(db.Float())
     
-    def __init__(self, name, user_name, email, password, admin=False):
+    def __init__(self, name, user_name, email, password, admin=False, phone_number=None, bankroll=None, plan=None):
         self.name = name
         self.email = email
         self.password = generate_password_hash(password)
@@ -133,6 +133,7 @@ class Tipster(object):
         email = data['email']
         user_name = data['user_name']
         password = data['password']
+        
 
         user = Users(name=name, user_name=user_name, email=email, password=password)
         db.session.add(user)

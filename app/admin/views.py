@@ -186,7 +186,7 @@ class Login(User):
                 token = jwt.encode({'user_id': user.id, 'exp': dt.datetime.utcnow() + dt.timedelta(hours=1)}, key)
             else:
                 token = jwt.encode({'user_id': user.id}, key)
-            return jsonify({'token': token.decode("UTF-8")})
+            return jsonify({'token': token.decode("UTF-8"), 'admin': user.admin})
         return login_failed()
 
 

@@ -73,3 +73,4 @@ def test_login():
     assert(response.status_code == 200)
     data  = json.loads(response.data)
     assert(data['token'])
+    assert(data['admin'] == False)

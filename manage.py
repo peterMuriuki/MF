@@ -21,7 +21,23 @@ manager.add_command('shell', Shell(make_context=make_shell_context))
 def deploy():
     """Define all the deploy operations once and in a encapsulated manner """
     # create the tables
+    db.drop_all()
+    db.create_all()
     upgrade()
+
+    # add admin
+    """Declare the below imported variables in a py-file named admin and place next to the Manage.py deployment file
+    the variables declare data used in initialising the super user account allowing for :
+
+    Hardcode the data or import from environment -> therefore add db to ignore list too
+        predictions approval
+        deleting predictions
+        user account managenent
+    """
+    from admin import name, user_name, email, password, admin, phone_number, bankroll, plan
+    admin = Users(name = name, user_name=user_name, email=email, password=password, admin=admin, phone_number=phone_number, bankroll=bankroll, plan=plan)
+    db.session.add(admin)
+    db.session.commit()
 
 
 if __name__ == '__main__':
