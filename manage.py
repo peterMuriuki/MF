@@ -21,8 +21,6 @@ manager.add_command('shell', Shell(make_context=make_shell_context))
 def deploy():
     """Define all the deploy operations once and in a encapsulated manner """
     # create the tables
-    db.drop_all()
-    db.create_all()
     upgrade()
 
     # add admin
@@ -39,6 +37,18 @@ def deploy():
     db.session.add(admin)
     db.session.commit()
 
+    """ 
+    DEPLOYMENT PROCEDURE
+    add admin configuration variables to environment
+    push to heroku master 
+    heroku deploy to construct the database and add admin account
+    heroku restart
+    """
+    
+@manager.command
+def destroy():
+    # just destroy the tables
+    db.drop_all()
 
 if __name__ == '__main__':
     manager.run()

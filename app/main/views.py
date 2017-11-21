@@ -20,14 +20,29 @@ pred_schema = PredictionsSchema()
 
 
 def default_response():
-    return {'urls':
-                    {
-                        'endpoint' : 'url_ednpoint url',
-                        'Predictions': url_for('main.tips', _external=True),
-                        'users': url_for('user.many', _external=True),
-                        'help': url_for('main.default', _external=True)
-                    }
+    return {
+        'urls':
+            {
+                'endpoint' : 'url_ednpoint url',
+                'Predictions': url_for('main.tips', _external=True),
+                'users': url_for('user.many', _external=True),
+                'help': url_for('main.default', _external=True)
+            },
+        'samples':{
+            'register':{
+                'method':"POST",
+                'url': url_for('user.register',_external=True)
+                },
+            'login':{
+                'method': "POST",
+                'url': url_for('user.login', _external=True)
+                },
+            'get_predictions':{
+                'method': "GET",
+                'url':url_for('main.tips', _external=True)
+                }
             }
+        }
 
 
 class Default(Resource):
@@ -123,17 +138,31 @@ class Tips(Resource):
     @token_required
     def get(self, current_user):
         """ returns a list of the current predictions of the current day, during test return all predictions
-        input: -> nothing
+        input: -> nothing -> a query parameter that shows what predictions to return
         output: -> a dictionary of lists with the key prediction. the list conatains dictionaries representing predictions instances
         """
         # run scrapper before the predictions are returned otherwise the predictions returned will not include the latest updates
         run()
+        q = request.args.get('q')
         from datetime import date as dt
         from datetime import datetime as cal
         date = dt.today()
         today = cal(date.year, date.month, date.day, 0, 0, 0)
-        # so that we can only get the predictions whose added time is greater than the start of the day.
-        predictions = Predictions.query.filter(Predictions.date_time >= today).all()
+        if q is None:
+            # means that we have no special requests, render return by default
+            # so that we can only get the predictions whose added time is greater than the start of the day. 
+            # we add a filter so that users get only approved predictions
+            if current_user.admin:
+                predictions = Predictions.query.filter(Predictions.date_time >= today).all()
+            else:
+                predictions = Predictions.query.filter(Predictions.date_time >= today).filter(Predictions.approved == True).all()
+        else:
+            #  option1 -> handled above, the requested predictions are within todays bounds,
+            #  option2 -> special case for landing page: get a paginated number of history say past 5 with a see more option
+            if q == 'landing':
+                # yeap its the landing page loading-> get the last immediate 10 approved predictions
+                predictions = Predictions.query.filter(Predictions.date_time < today).filter(Predictions.approved == True).order_by(Predictions.date_time).limit(10)
+            
         list_ = []
         for prediction in predictions:
             list_.append(prediction)
