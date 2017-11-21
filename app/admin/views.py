@@ -168,12 +168,20 @@ class Login(User):
         app = current_app._get_current_object()
         key = app.config['SECRET_KEY']
 
-        if not auth or not auth.username or not auth.password:
-            login_failed()
-        user = Users.query.filter_by(user_name=auth.username).first()
+        if auth is not None:
+            if not auth or not auth.username or not auth.password:
+                login_failed()
+                password = auth.password
+            user = Users.query.filter_by(user_name=auth.username).first()
+        else:
+            # retrieve the authorisation data as json
+            response = request.get_json()
+            user_name = response['user_name']
+            password = response['password']
+            user = Users.query.filter_by(user_name=user_name).first()
         if not user:
-            login_failed()
-        if check_password_hash(user.password, auth.password):
+            return login_failed()
+        if check_password_hash(user.password, password):
             if not user.admin:
                 token = jwt.encode({'user_id': user.id, 'exp': dt.datetime.utcnow() + dt.timedelta(hours=1)}, key)
             else:

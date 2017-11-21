@@ -13,6 +13,11 @@ def setup_module(module):
     db.create_all()
     global client
     client = app.test_client()
+    global headers
+    headers = {
+        'content-type': "application/json",
+        'cache-control': "no-cache"
+        }
 
 def teardown_module(module):
     """close up and clear the database """
@@ -31,17 +36,13 @@ def test_registration():
     """works properly  against devoid information and responds with the required info
     test ->  post data"""
     data = '''{
-        "name": "Peter",
-        "email": "Pmuriuki@gmail.com",
+        "name": "Peter Denzel",
+        "email": "Pmui@gmail.com",
         "user_name": "peter",
         "password": "adasdwe"
     }'''
     # kwani how is one supposed to package a json payload to a post request -> not as from data
         # answer the data payload containing the json data should be added as type str
-    headers = {
-        'content-type': "application/json",
-        'cache-control': "no-cache"
-        }
     response = client.post(url_for('user.register'), data=data, headers=headers)
     assert(response.status_code == 201)
     data = json.loads(response.data)
@@ -54,3 +55,21 @@ def test_registration_from_db():
     users = Users.query.all()
     assert(bool(len(users)))
 
+
+def test_user_instance_from_db():
+    """this functions checks that the added instance is inside the database as it should"""
+    user = Users.query.filter_by(user_name="peter").first()
+    assert(user is not None)
+    assert(user.email == "Pmui@gmail.com")
+    assert(not user.admin)
+
+def test_login():
+    """This function checks that login is as intended """
+    data = """{
+        "user_name": "peter",
+        "password": "adasdwe"
+    }"""
+    response = client.post(url_for('user.login'), data=data, headers=headers)
+    assert(response.status_code == 200)
+    data  = json.loads(response.data)
+    assert(data['token'])
