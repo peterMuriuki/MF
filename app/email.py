@@ -47,25 +47,28 @@ class ToAdmin(object):
 
             contact him at: {}
             """.format(user_obj.name, user_obj.user_name, user_obj.email)
+        app = current_app._get_current_object()
         subject = "(Hooray)NEW USER"
         html_body = render_template('email/new_user.html', user_obj)
-        send_email(subject, app.config['MAIL_USERNAME'], 'FLASKY['WEBMASTER']', message, html_body)
+        send_email(subject, app.config['MAIL_USERNAME'], app.config['WEBMASTER'], message, html_body)
         return True
 
     def error(self, error_message):
-        """Forwards an error message ot administrator"""
+        """Forwards an error message to administrator"""
         subject = "SHIT"
-        send_email(subject, app.config['MAIL_USERNAME'], 'FLASKY['WEBMASTER']', error_message, error_message)
+        app = current_app._get_current_object()
+        send_email(subject, app.config['MAIL_USERNAME'], app.config['WEBMASTER'], error_message, error_message)
         return True
 
     def new_prediction(self, predictions):
         """Sends informatoion on newly added tips to the administrator"""
         subject = "NEW TIPS"
         message = ""
+        app = current_app._get_current_object()
         for prediction in predictions:
             message += "{} {} {}\n".format(prediction.ficture, prediction.pick, prediction.odds)
         html_body = render_template('email/new_predictions.html', predictions)
-        send_email(subject, app.config['MAIL_USERNAME'], 'wpmuriuki98@gmail.com', message, html_body)
+        send_email(subject, app.config['MAIL_USERNAME'], app.config['WEBMASTER'], message, html_body)
         return True
 
 
@@ -74,6 +77,7 @@ class ToAdmin(object):
         Pending sends an eamail detailing the results of the advised tips as well as the 
         resultant effect on the bacnkroll
         """
+        app = current_app._get_current_object()
         pass
 
 class ToUser(object):
@@ -102,12 +106,14 @@ class ToUser(object):
 
         html_body = render_template('email/welcome.html')
         subject = "{EANMBLE}Just Saying Hello"
+        app = current_app._get_current_object()
         send_email(subject, app.config['MAIL_USERNAME'], user_obj.email, message, html_body)
 
     def new_approved(self, email_list, predictions):
         """Emails a list of approved predictions to the emailing list of all users includinf the admin"""
         message = ""
         total_odds = 0.00
+        app = current_app._get_current_object()
         for prediction in predictions:
             message += " {} {} {}\n".format(prediction.fixture, prediction.pick, prediction.odds)
         # we need to include staking information some where in the message

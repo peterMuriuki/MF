@@ -168,7 +168,7 @@ class Login(User):
         app = current_app._get_current_object()
         key = app.config['SECRET_KEY']
 
-        if auth is not None:
+        if not auth:
             if not auth or not auth.username or not auth.password:
                 login_failed()
                 password = auth.password
