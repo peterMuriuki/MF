@@ -22,7 +22,6 @@ def deploy():
     """Define all the deploy operations once and in a encapsulated manner """
     # create the tables
     db.drop_all()
-    upgrade()
     db.create_all()
     
     Users.insert_admin()
