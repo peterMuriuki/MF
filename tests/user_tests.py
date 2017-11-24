@@ -1,4 +1,5 @@
 import pytest
+import json as j_son
 from flask import json, url_for
 from . import Users, create_app, db
 
@@ -65,11 +66,11 @@ def test_user_instance_from_db():
 
 def test_login():
     """This function checks that login is as intended """
-    data = """{
+    data = {
         "user_name": "peter",
         "password": "adasdwe"
-    }"""
-    response = client.post(url_for('user.login'), data=data, headers=headers)
+    }
+    response = client.post(url_for('user.login'), data=j_son.dumps(data), headers=headers)
     assert(response.status_code == 200)
     data  = json.loads(response.data)
     assert(data['token'])

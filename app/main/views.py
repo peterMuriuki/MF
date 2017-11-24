@@ -143,26 +143,14 @@ class Tips(Resource):
         """
         # run scrapper before the predictions are returned otherwise the predictions returned will not include the latest updates
         run()
-        q = request.args.get('q')
         from datetime import date as dt
         from datetime import datetime as cal
         date = dt.today()
         today = cal(date.year, date.month, date.day, 0, 0, 0)
-        if q is None:
-            # means that we have no special requests, render return by default
-            # so that we can only get the predictions whose added time is greater than the start of the day. 
-            # we add a filter so that users get only approved predictions
-            if current_user.admin:
-                predictions = Predictions.query.filter(Predictions.date_time >= today).all()
-            else:
-                predictions = Predictions.query.filter(Predictions.date_time >= today).filter(Predictions.approved == True).all()
+        if current_user.admin:
+            predictions = Predictions.query.filter(Predictions.date_time >= today).all()
         else:
-            #  option1 -> handled above, the requested predictions are within todays bounds,
-            #  option2 -> special case for landing page: get a paginated number of history say past 5 with a see more option
-            if q == 'landing':
-                # yeap its the landing page loading-> get the last immediate 10 approved predictions
-                predictions = Predictions.query.filter(Predictions.date_time < today).filter(Predictions.approved == True).order_by(Predictions.date_time).limit(10)
-            
+            predictions = Predictions.query.filter(Predictions.date_time >= today).filter(Predictions.approved == True).all()
         list_ = []
         for prediction in predictions:
             list_.append(prediction)
