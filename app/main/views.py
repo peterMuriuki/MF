@@ -114,7 +114,7 @@ class Tips_id(Resource):
         else:
             return { "message": "Prediction Not modified"}, 304
 
-    
+
 class Tips(Resource):
     """Endpoint Resource:
     get -> return all saved predictions for the day
@@ -138,7 +138,7 @@ class Tips(Resource):
     @token_required
     def get(self, current_user):
         """ returns a list of the current predictions of the current day, during test return all predictions
-        input: -> nothing -> a query parameter that shows what predictions to return
+        input: -> nothing a user object parsed in from the decorator token required
         output: -> a dictionary of lists with the key prediction. the list conatains dictionaries representing predictions instances
         """
         # run scrapper before the predictions are returned otherwise the predictions returned will not include the latest updates

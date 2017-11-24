@@ -3,6 +3,7 @@ from . import db
 from werkzeug.security import generate_password_hash
 from marshmallow import fields, Schema, post_load
 from datetime import datetime
+import os
 
 
 class Predictions(db.Model):
@@ -79,7 +80,7 @@ class Users(db.Model):
     admin = db.Column(db.Boolean())
     plan = db.Column(db.String(10), nullable=True)
     bankroll = db.Column(db.Float())
-    
+
     def __init__(self, name, user_name, email, password, admin=False, phone_number=None, bankroll=None, plan=None):
         self.name = name
         self.email = email
@@ -94,6 +95,23 @@ class Users(db.Model):
     def set_bankroll(self, bankroll):
         """called upon once a user decides to credit his acount with cash"""
         self.bankroll = bankroll
+
+    @staticmethod
+    def insert_admin():
+        """ add the super user admin"""
+        name = os.environ.get('EANMBLE_ADMIN_NAME')
+        email = os.environ.get('EANMBLE_ADMIN_EMAIL')
+        password = os.environ.get('EANMBLE_ADMIN_PASSWORD')
+        user_name = os.environ.get('EANMBLE_ADMIN_USER_NAME')
+        admin = True
+        phone_number = os.environ.get('EANMBLE_ADMIN_PHONE_NUMBER')
+        bankroll = None
+        plan = None
+        admin = Users(name = name, user_name=user_name, email=email, password=password, admin=admin, phone_number=phone_number, bankroll=bankroll, plan=plan)
+        db.session.add(admin)
+        db.session.commit()
+        return True
+
 
 class UsersSchema(Schema):
     """Defines the serialization and deserialization of the users class to and from dict to python object"""
@@ -133,19 +151,19 @@ class Tipster(object):
         email = data['email']
         user_name = data['user_name']
         password = data['password']
-        
+
 
         user = Users(name=name, user_name=user_name, email=email, password=password)
         db.session.add(user)
         db.session.commit()
         return user
-    
+
     def add_prediction(self, data):
         """add prediction"""
-        pred_id = data["prediction_id"] 
-        fixture = data["fixture"] 
-        url = data["tipster_url"] 
-        name = data["tipster_name"] 
+        pred_id = data["prediction_id"]
+        fixture = data["fixture"]
+        url = data["tipster_url"]
+        name = data["tipster_name"]
         pick = data["pick"]
         confidence = data["confidence"]
         odds = data["odds"]
@@ -156,7 +174,7 @@ class Tipster(object):
         db.session.add(pred_obj)
         db.session.commit()
         return pred_obj
-        
+
     def delete_sharp(self, user_obj):
         """remove a user from the database"""
         try:
@@ -209,7 +227,7 @@ class Plans(object):
 
     def place_bet(self):
         """
-        will be responsible for consolidating all the required functions for 
+        will be responsible for consolidating all the required functions for
         bet placement, bet settlement and bankroll modification
         """
 
