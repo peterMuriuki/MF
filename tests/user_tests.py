@@ -73,5 +73,14 @@ def test_login():
     response = client.post(url_for('user.login'), data=j_son.dumps(data), headers=headers)
     assert(response.status_code == 200)
     data  = json.loads(response.data)
+    token = data['token']
+    global token
     assert(data['token'])
     assert(data['admin'] == False)
+
+def test_predictions():
+    """folow up on the above tests:
+    registration -> login -> and now viewing the predictions"""
+    response = client.get(url_for('main.tips'), headers={'x-access-token':token})
+    assert response.status_code == 200
+    data = json.loads(response.data)
