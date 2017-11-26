@@ -76,10 +76,9 @@ def admin_eyes(f):
     return decorated
 
 
-def login_failed():
-    return make_response('could not verify', 401, {
-                'WWW-Authenticate' : 'Basic realm="Login required"'
-            })
+def login_failed(message):
+    return {'message'.format(message)
+            }, 401
 
 
 class User(Resource):
@@ -173,7 +172,7 @@ class Login(User):
 
         if auth:
             if not auth or not auth.username or not auth.password:
-                login_failed()
+                login_failed('The auth object is present but problematic')
                 password = auth.password
             user = Users.query.filter_by(user_name=auth.username).first()
         else:
@@ -183,14 +182,14 @@ class Login(User):
             password = response['password']
             user = Users.query.filter_by(user_name=user_name).first()
         if not user:
-            return login_failed()
+            return login_failed('The user with the username was not found')
         if check_password_hash(user.password, password):
             if not user.admin:
                 token = jwt.encode({'user_id': user.id, 'exp': dt.datetime.utcnow() + dt.timedelta(hours=1)}, key)
             else:
                 token = jwt.encode({'user_id': user.id}, key)
             return jsonify({'token': token.decode("UTF-8"), 'admin': user.admin})
-        return login_failed()
+        return login_failed('Password not found')
 
 
 class RERegister(User):
