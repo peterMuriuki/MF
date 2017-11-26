@@ -1,5 +1,6 @@
 """Model the database relationships for data persistence"""
 from . import db
+from sqlalchemy.exc import OperationalError
 from werkzeug.security import generate_password_hash
 from marshmallow import fields, Schema, post_load
 from datetime import datetime
@@ -57,6 +58,7 @@ class PredictionsSchema(Schema):
     prediction_id = fields.String()
     fixture = fields.String()
     tipster_url = fields.String()
+    tipster_name = fields.String()
 	# date_time = fields.string()
     pick = fields.String()
     confidence = fields.Float()
@@ -154,8 +156,12 @@ class Tipster(object):
 
 
         user = Users(name=name, user_name=user_name, email=email, password=password)
-        db.session.add(user)
-        db.session.commit()
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except OperationalError as e:
+            db.session.rollback()
+            # do sth here maybe send a fkn email or throw another more manageable error
         return user
 
     def add_prediction(self, data):
@@ -180,7 +186,7 @@ class Tipster(object):
         try:
             db.session.delete(user_obj)
             db.session.commit()
-        except:
+        except OperationalError:
             return False
         return True
 
@@ -209,8 +215,11 @@ class Tipster(object):
 
     def delete_prediction(self, pred_obj):
         """Removes a prediction object"""
-        db.session.delete(pred_obj)
-        db.session.commit()
+        try:
+            db.session.delete(pred_obj)
+            db.session.commit()
+        except OperationalError as e:
+            db.session.rollback()
         return True
 
 class Plans(object):

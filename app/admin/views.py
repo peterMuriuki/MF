@@ -6,7 +6,7 @@ from flask import Blueprint
 
 user = Blueprint('user', __name__)
 
-
+from sqlalchemy.exc import OperationalError
 from flask import request, make_response, jsonify, current_app
 import jwt
 import datetime as dt
@@ -36,14 +36,16 @@ def token_required(f):
             token = request.headers['x-access-token']
         if not token:
             return {'message': 'Token is missing'}, 401
+        person = None
         try:
             data = jwt.decode(token, key)
-            user = Users.query.filter_by(id=data['user_id']).first()
-            if user is None:
-                raise Exception('user is None')
-        except:
+            person = Users.query.filter_by(id=data['user_id']).first()
+        except OperationalError:
             return {'message': 'Token is invalid'}, 401
-        return f(user, *args, **kwargs)
+        if person is None:
+            return {'message': 'Token is invalid'}, 401
+
+        return f(person, *args, **kwargs)
     return decorated
 
 
@@ -60,14 +62,15 @@ def admin_eyes(f):
             token = request.headers['x-access-token']
         if not token:
             return {'message': 'Token is missing'}, 401
+        person = None
         try:
             data = jwt.decode(token, key)
-            user = Users.query.filter_by(id=data['user_id']).first()
-            if user is None:
-                raise Exception('user is None')
+            person = Users.query.filter_by(id=data['user_id']).first()
         except:
             return {'message': 'Token is invalid'}, 401
-        if user.admin:
+        if person is None:
+            return {'message': 'Token is invalid'}, 401
+        if person.admin:
             return f(*args, **kwargs)
         return {'message': 'User is forbidden'}, 403
     return decorated

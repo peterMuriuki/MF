@@ -74,8 +74,8 @@ class Tips_id(Resource):
     put -> approve confirmation/ classified admin eyes only
     delete -> remove a prediction from any level of consideration
     """
-    @token_required
     @admin_eyes
+    @token_required
     def put(self, current_user, pred_id):
         """ updates the approved boolean property of the prediction
         input: -> the Prediction's prediction_key from decoded secret key
@@ -101,8 +101,8 @@ class Tips_id(Resource):
                 "prediction": pred_schema.dump(pred_obj).data
                 }, 200
 
-    @token_required
     @admin_eyes
+    @token_required
     def delete(self, pred_id):
         """removes the prediction instance
         input: -> encoded secret key with the predictions prediction_id
@@ -120,8 +120,9 @@ class Tips(Resource):
     get -> return all saved predictions for the day
     post -> add predictions to the database
     """
-    @token_required
+
     @admin_eyes
+    @token_required
     def post(self):
         """add a new prediction
         input: -> diction from scrapped data
