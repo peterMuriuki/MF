@@ -77,7 +77,7 @@ def admin_eyes(f):
 
 
 def login_failed(message):
-    return {'message'.format(message)
+    return {'message': '{}'.format(message)
             }, 401
 
 
@@ -171,8 +171,8 @@ class Login(User):
         key = app.config['SECRET_KEY']
 
         if auth:
-            if not auth or not auth.username or not auth.password:
-                login_failed('The auth object is present but problematic')
+            if not auth.username or not auth.password:
+                return login_failed('The auth object is present but problematic')
                 password = auth.password
             user = Users.query.filter_by(user_name=auth.username).first()
         else:
@@ -189,7 +189,7 @@ class Login(User):
             else:
                 token = jwt.encode({'user_id': user.id}, key)
             return jsonify({'token': token.decode("UTF-8"), 'admin': user.admin})
-        return login_failed('Password not found')
+        return login_failed('Password not found {}'.format(password))
 
 
 class RERegister(User):

@@ -21,9 +21,10 @@ manager.add_command('shell', Shell(make_context=make_shell_context))
 def deploy():
     """Define all the deploy operations once and in a encapsulated manner """
     # create the tables
+
     db.create_all()
     
-    Users.insert_admin()
+    # Users.insert_admin()
 
 
     """
