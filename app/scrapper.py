@@ -9,13 +9,16 @@ import re, sys, requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from .models import Predictions, Tipster
+from .omy import ElementError
 
 tipster = Tipster()
 
 
 def get_home_page(text=False, file=None):
-    """returns either a soup object or string object as per the given arguments
-     soup_object by default"""
+    """
+    returns either a soup object or string object as per the given arguments
+     soup_object by default
+     """
     if file is None:
         home_url = 'http://www.typersi.com'
         index_html = requests.get(home_url).text
@@ -150,16 +153,20 @@ def all_other_tips_compiler(data_list):
 def parse_table_rows(tr_list):
     """ extracts the data from the html table rows"""
     return_list = list()
-    for tr in tr_list:
-        temp_diction = {}
-        td_list = tr.find_all('td')
-        # validating the number of tds in that we have just captured
-        if len(td_list) > 9 and len(td_list) < 8:
-            raise Exception('Problem getting the table data')
-        # tipster details in the first td
+
+    def get_tipster(td_list):
+        """
+        :param td_list:
+        :return:
+        tipster details in the first td
+        """
         first_td = td_list[0]
         tipster_url = 'http://www.typersi.com/' + first_td.a.get('href').strip()
         tipster_name = first_td.a.get_text().strip()
+        return tipster_url, tipster_name
+
+    def get_time(td_list):
+        """retrieves the time of play... warn against undefined utc zones"""
         # timing functionality
         second_td = td_list[1]
         time_as_string = second_td.get_text()
@@ -168,43 +175,79 @@ def parse_table_rows(tr_list):
         today = datetime.today()
         time_of_play = datetime(today.year, today.month, today.day, hour, minute)
         time_of_play.hour + 1
+        return time_of_play
+
+    def get_fixture(td_list):
+        """get the match info: includes both the home and away teams"""
         # the fixture including both the home team and the away team
         third_td = td_list[2]
         fixture = third_td.get_text().strip()
+        return fixture
+
+    def get_pick(td_list):
+        """retrieve the pick"""
         # the pick
         fourth_td = td_list[3]
         if len(re.findall(r'\d', fourth_td.get_text())) > 0:
             pick = str(fourth_td.get_text()).strip()
         else:
             pick = str(fourth_td.get_text().strip(' '))
-        # the proposed stake
-        try:
-            fifth_td = td_list[4]
-        except IndexError:
-            print(td_list)
+        return pick
+
+    def get_confidence(td_list):
+        """scraps off the confidence level of a tip"""
+        fifth_td = td_list[4]
         proposed_stake = fifth_td.get_text()
         stake_as_float = float(proposed_stake)
         confidence = stake_as_float / 30.0 * 100
         confidence = round(confidence)
+        return confidence
+
+    def get_odds(td_list):
+        """"""
         # now to a very important part to the odds
         sixth_td = td_list[5]
         odds_as_string = sixth_td.get_text()
         odds = float(odds_as_string)
+        return odds
+
+    def get_sport(td_list):
+        """Retrieves either the sport or the result since the appearance of the two is mutually inclusive->
+        However it is my intention that they are both saved separately"""
         # as for the results i.e if provided
         results_td = td_list[-2]
         results = results_td.get_text()
         if len(re.findall('\d', results)) == 0:
             # signifies that the there is no digit in the result and thus the score is not yet displayed
-            result = None
-        temp_diction['tipster_url'] = tipster_url
-        temp_diction['tipster_name'] = tipster_name
-        temp_diction['time_of_play'] = time_of_play
-        temp_diction['fixture'] = fixture
-        temp_diction['pick'] = pick
-        temp_diction['confidence'] = confidence
-        temp_diction['odds'] = odds
-        temp_diction = prediction_id_generator(temp_diction)
-        return_list.append(temp_diction)
+            home_score = None
+            away_score = None
+            sport = results
+        else:
+            home_score = re.findall('\d', results)
+            away_score = re.findall('\d', results)
+            sport = None
+
+        return home_score, away_score, sport
+
+
+    for tr in tr_list:
+        try:
+            temp_diction = {}
+            td_list = tr.find_all('td')
+            # validating the number of tds in that we have just captured
+            if len(td_list) > 9 or len(td_list) < 8:
+                raise ElementError('Problem getting the table data')
+            temp_diction['tipster_url'], temp_diction['tipster_name'] = get_tipster(td_list)
+            temp_diction['time_of_play'] = get_time(td_list)
+            temp_diction['fixture'] = get_fixture(td_list)
+            temp_diction['pick'] = get_pick(td_list)
+            temp_diction['confidence'] = get_confidence(td_list)
+            temp_diction['odds'] = get_odds(td_list)
+            temp_diction['home_score'], temp_diction['away_score'], temp_diction['sport'] = get_sport(td_list)
+            temp_diction = prediction_id_generator(temp_diction)
+            return_list.append(temp_diction)
+        except ElementError:
+            continue
     return return_list
 
   

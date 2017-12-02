@@ -52,9 +52,13 @@ class Tipster(object):
         confidence = data["confidence"]
         odds = data["odds"]
         _time = data['time_of_play']
+        sport = data['sport']
+        home_score = data['home_score']
+        away_score = data['away_score']
         count = data['count']
         pred_obj = Predictions(prediction_id=pred_id, _time=_time, fixture=fixture, tipster_url=url, tipster_name=name,
-                               pick=pick, confidence=confidence, odds=odds, count=count)
+                               pick=pick, confidence=confidence, odds=odds, count=count, home_score=home_score,
+                               away_score=away_score, sport=sport)
         db.session.add(pred_obj)
         db.session.commit()
         return pred_obj

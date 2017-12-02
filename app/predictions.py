@@ -18,7 +18,7 @@ class Predictions(db.Model):
     approved = db.Column(db.Boolean())
     home_score = db.Column(db.Integer(), nullable=True)
     away_score = db.Column(db.Integer(), nullable=True)
-    sport = db.Column(db.String(20))
+    sport = db.Column(db.String(20), nullable=True)
     count = db.Column(db.Integer(), nullable=True)
 
     def __repr__(self):
@@ -56,7 +56,7 @@ class PredictionsSchema(Schema):
     fixture = fields.String()
     tipster_url = fields.String()
     tipster_name = fields.String()
-    date_time = fields.string()
+    date_time = fields.String()
     pick = fields.String()
     confidence = fields.Float()
     odds = fields.Float()
