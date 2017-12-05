@@ -2,7 +2,7 @@
 import unittest
 from .golden_data import td, less_td, more_td
 from bs4 import BeautifulSoup
-from . import parse_table_rows as parse
+from . import parse_table_rows as parse, time_splitter
 
 class ScrapTests(unittest.TestCase):
     """refer to module documentation"""
@@ -64,3 +64,15 @@ class ScrapTests(unittest.TestCase):
         self.assertFalse(response)
         self.assertIs(type(response), list)
 
+
+    def test_time_splitter_function(self):
+        """
+        the splitter function is one of the more volatile functions that scrap relies on
+        the string parameter is ever changing and the probable sample set is too huge
+        """
+        string = '18:30'
+        response = time_splitter(string)
+        self.assertIs(type(response), list)
+        self.assertTrue(len(response) == 2)
+        self.assertEqual(response[0], 18)
+        self.assertEqual(response[1], 30)

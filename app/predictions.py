@@ -3,6 +3,8 @@
 from . import db
 from marshmallow import fields, Schema, post_load
 from datetime import datetime
+from sqlalchemy.exc import OperationalError
+
 
 class Predictions(db.Model):
     __table_name__ = "predictions"
@@ -20,6 +22,7 @@ class Predictions(db.Model):
     away_score = db.Column(db.Integer(), nullable=True)
     sport = db.Column(db.String(20), nullable=True)
     count = db.Column(db.Integer(), nullable=True)
+    comment= db.Column(db.Text(), nullable=True)
 
     def __repr__(self):
         """returns/displays an arbitrary representation of a row"""
@@ -49,6 +52,14 @@ class Predictions(db.Model):
         self.home_score = home_score
         self.away_score = away_score
 
+    def add_comment(self, comment):
+        """:param: analysis by the admin"""
+        try:
+            self.comment = comment
+            db.session.commit()
+        except OperationalError as error:
+            db.session.rollback()
+
 class PredictionsSchema(Schema):
     """ defines the schema for serializing and deserializing dictionaries and objects"""
     id = fields.Integer()
@@ -63,6 +74,7 @@ class PredictionsSchema(Schema):
     approved = fields.Boolean()
     sport = fields.String()
     count = fields.Integer()
+    comment = fields.String()
 
     @post_load
     def make_user(self, data):

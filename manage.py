@@ -24,7 +24,8 @@ def deploy():
 
     db.create_all()
     
-    # Users.insert_admin()
+    if app.config['CONFIGURATION'] == 'production':
+        Users.insert_admin()
 
 
     """

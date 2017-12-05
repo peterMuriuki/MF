@@ -5,7 +5,7 @@
     This module is the toolbox of all scrapping and organisation of return data which
     will be mostly inform of basic python objects -> mostly dictionary
  """
-import re, sys, requests
+import re, requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from .models import Predictions, Tipster
@@ -40,8 +40,7 @@ def get_efficient_table(soup):
     if len(re.findall(h2_string, str(soup))):
         best_5_header = soup.find_all('h2', string=h2_string)[0]
     else:
-        print("Extreme danger!.. site's relative structure compromised, re-evaluate")
-        sys.exit(2)
+        raise ElementError("Extreme danger!.. site's relative structure compromised, re-evaluate")
     desired_table = best_5_header.next_sibling.next_sibling
     return desired_table
 
@@ -69,8 +68,7 @@ def get_all_tips_desired_table(soup):
     if len(re.findall(h2_string, str(soup))):
         best_5_header = soup.find_all('h2', string=h2_string)[0]
     else:
-        print("Extreme danger!.. site's relative structure compromised, re-evaluate")
-        sys.exit(2)
+        raise ElementError("Extreme danger!.. site's relative structure compromised, re-evaluate")
     desired_table = best_5_header.next_sibling.next_sibling
     return desired_table
 
@@ -283,10 +281,10 @@ def instance_unique_checker(pred_id):
         return True
 
 def time_splitter(string):
-    """This function will deive the hour and minutes that a game will be played from a string
+    """This function will derive the hour and minutes that a game will be played from a string
     it will also check the integrity of such a time"""
     # date format is -> two digits, a separator and another two digits
-    pattern = r'\d{1:2}'
+    pattern = r'\d+'
     time_list = re.findall(pattern, string)
     hour, minute = 0, 0
     if len(time_list) != 2:
@@ -306,9 +304,13 @@ def time_splitter(string):
 
 def run():
     """run the get efficient tips commands"""
-    soup = get_home_page()
-    get_picks_from_tipsters_with_the_best_efficiency(soup)
-    get_all_other_tips()
+    try:
+        soup = get_home_page()
+        get_picks_from_tipsters_with_the_best_efficiency(soup)
+        get_all_other_tips()
+    except ElementError as e:
+        # send email for confirmation to admin and log issue
+        pass
 
 if __name__ == '__main__':
     run()
