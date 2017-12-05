@@ -14,7 +14,7 @@ class Predictions(db.Model):
     fixture = db.Column(db.String(100))
     tipster_url = db.Column(db.String(64))
     tipster_name = db.Column(db.String(64))
-    pick = db.Column(db.String(5))
+    pick = db.Column(db.String(35))
     confidence = db.Column(db.Float())
     odds = db.Column(db.Float())
     approved = db.Column(db.Boolean())
