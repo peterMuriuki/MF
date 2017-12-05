@@ -30,7 +30,8 @@ class Predictions(db.Model):
      self.tipster_url, self.pick, self.confidence, self.odds, self.approved, self.sport, self.count)
 
     def __init__(self, prediction_id, fixture, tipster_url, tipster_name, pick,
-    confidence, odds, _time=datetime.utcnow(), sport='', approve=False, count=0):
+    confidence, odds, _time=datetime.utcnow(), sport='', approve=False, count=0, home_score=None,
+    away_score=None):
         self.prediction_id = prediction_id
         self.fixture = fixture
         self.date_time = _time
@@ -42,15 +43,19 @@ class Predictions(db.Model):
         self.approved = approve
         self.sport = sport
         self.count = count
+        self.home_score = home_score
+        self.away_score = away_score
 
     def approve(self):
         """After a prediction is looked up and approved by admin; set confirm to True"""
         self.approved = True
+        db.session.commit()
 
     def set_score(self, home_score, away_score):
         """set the result after full time. asynchronously check the odds"""
         self.home_score = home_score
         self.away_score = away_score
+        db.session.commit()
 
     def add_comment(self, comment):
         """:param: analysis by the admin"""

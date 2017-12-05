@@ -1,7 +1,7 @@
 """Test file"""
 import os
 import pytest
-from . import *
+from . import create_app, Predictions, Users, Tipster, db, get_all_other_tips, get_home_page, get_picks_from_tipsters_with_the_best_efficiency
 from bs4 import BeautifulSoup
 
 
@@ -20,13 +20,15 @@ def setup_module(module):
     app = create_app('testing')
     app_context = app.app_context()
     app_context.push()
+    tipster = Tipster()
+    global tipster
     db.drop_all()
     db.create_all()
 
 def teardown_module(module):
     """close up and clear the database """
-    # db.session.remove()
-    # db.drop_all()
+    db.session.remove()
+    db.drop_all()
 
 
 @pytest.mark.parametrize('file',asb_files)
@@ -51,3 +53,70 @@ def test_predictions_fields_with_count():
     assert len(response) > 0
 
 
+def test_modify_predictions_standard_case():
+    """ checks that given a proper json dictionary object; the tipster is able to correctly
+    change only the defined data members of the respective project
+    """
+    data = {
+        "approved": True,
+        "home_score": 20,
+        "away_score": 30,
+        "comment": "this is the Super user comment"
+    }
+    pred = Predictions.query.filter_by(id=1).first()
+    assert not pred.approved
+    assert pred.home_score != 20
+    assert pred.away_score != 30
+    assert pred.comment is None
+    mod = tipster.modify_prediction(data, pred)
+    assert mod.id == 1
+    assert mod.approved
+    assert mod.home_score == 20
+    assert mod.away_score == 30
+    assert mod.comment == "this is the Super user comment"
+
+
+def test_modify_predictions_partial_standard_case():
+    """what if we do not necessarily want to change all the fields"""
+    data = {
+        "home_score": 40,
+        "comment": "Another comment"
+    }
+    pred = Predictions.query.filter_by(id=3).first()
+    assert pred.home_score != 40
+    assert pred.comment is None
+    mod = tipster.modify_prediction(data, pred)
+    assert mod.home_score == 40
+    assert mod.id == 3
+    assert mod.comment == "Another comment"
+
+
+def test_modify_predictions_border_case():
+    """Fields that should not be changed"""
+    data = {
+        "fixture":"Manchester United - Harambee Stars"
+    }
+    pred = Predictions.query.filter_by(id=6).first()
+    fix = pred.fixture
+    assert pred.fixture != data['fixture']
+    with pytest.raises(Exception):
+        mod = tipster.modify_prediction(data, pred)
+    assert pred.fixture == fix
+
+
+def test_modify_predictions_wrong_border_case():
+    """Now how about deformed or unknown field names"""
+    data = {
+        "coment": "Comment"
+    }
+    pred = Predictions.query.filter_by(id=6).first()
+    with pytest.raises(Exception):
+        mod = tipster.modify_prediction(data, pred)
+    assert pred.comment is None
+
+def test_delete_prediction():
+    pred = Predictions.query.filter_by(id=5).first()
+    assert pred is not None
+    tipster.delete_prediction(pred_obj=pred)
+    mod = Predictions.query.filter_by(id=5).first()
+    assert mod is None

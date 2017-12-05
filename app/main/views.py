@@ -77,15 +77,27 @@ class Tips_id(Resource):
     @admin_eyes
     @token_required
     def put(self, current_user, pred_id):
-        """ updates the approved boolean property of the prediction
+        """ updates the data memebers of a prediction instance, if json body is empty it only updates the
+        boolean approved field by default
         input: -> the Prediction's prediction_key from decoded secret key
         output: -> message; and object details"""
-        pred_obj = Predictions.query.filter_by(id=pred_id).first()
-        pred_obj = tipster.approve_prediction(pred_obj)
-        return {
+        data = request.get_json()
+        if data is None:
+            pred_obj = Predictions.query.filter_by(id=pred_id).first()
+            pred_obj = tipster.approve_prediction(pred_obj)
+            return {
                     'message': 'approved {}'.format(pred_id),
                     "prediction": pred_schema.dump(pred_obj).data
                 }, 201
+        else:
+            # tipster modify prediction
+            pred_obj = Predictions.query.filter_by(id=pred_id).first()
+            pred_obj = tipster.modify_prediction(pred_obj, data)
+            return {
+                'message':'Prediction {} succesfully modified'.format(pred_id),
+                "prediction": pred_schema.dump(pred_obj).data
+            }, 201
+
 
     @token_required
     def get(self, current_user, pred_id):

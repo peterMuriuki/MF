@@ -1,7 +1,7 @@
 import pytest
 import json as j_son
 from flask import json, url_for
-from . import Users, create_app, db
+from . import Users, create_app, db, Predictions, Tipster
 
 
 def setup_module(module):
@@ -84,3 +84,5 @@ def test_predictions():
     response = client.get(url_for('main.tips'), headers={'x-access-token':token})
     assert response.status_code == 200
     data = json.loads(response.data)
+
+

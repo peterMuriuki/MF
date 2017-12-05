@@ -5,6 +5,7 @@ from . import db
 from sqlalchemy.exc import OperationalError
 from werkzeug.security import generate_password_hash
 from marshmallow import fields, Schema, post_load
+import os
 
 class Users(db.Model):
     __table_name__ = "users"

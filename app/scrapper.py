@@ -221,8 +221,8 @@ def parse_table_rows(tr_list):
             away_score = None
             sport = results
         else:
-            home_score = re.findall('\d', results)
-            away_score = re.findall('\d', results)
+            home_score = re.findall('\d', results)[0]
+            away_score = re.findall('\d', results)[1]
             sport = None
 
         return home_score, away_score, sport

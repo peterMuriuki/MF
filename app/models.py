@@ -95,6 +95,28 @@ class Tipster(object):
         db.session.commit()
         return user
 
+    def modify_prediction(self, data, pred_obj):
+        """Modifies a prediction data members irrespective of whatever fields to be chamged
+        fields that can be sensfully changed: """
+        changeable = ['approved', 'home_score', 'away_score', 'comment']
+        for key in data.keys():
+            if key not in changeable:
+                raise Exception('Key invalid')
+        approved = data.get('approved')
+        home_score = data.get('home_score')
+        away_score = data.get('away_score')
+        comment = data.get('comment')
+        if approved is not None:
+            pred_obj.approved = approved
+        if home_score is not None:
+            pred_obj.home_score = home_score
+        if away_score is not None:
+            pred_obj.away_score = away_score
+        if comment is not None:
+            pred_obj.comment = comment
+        db.session.commit()
+        return pred_obj
+
     def delete_prediction(self, pred_obj):
         """Removes a prediction object"""
         try:
