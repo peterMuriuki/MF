@@ -307,6 +307,10 @@ def run():
     try:
         soup = get_home_page()
         get_picks_from_tipsters_with_the_best_efficiency(soup)
+    except ElementError as e:
+        # send email for confirmation to admin and log issue
+        pass
+    try:
         get_all_other_tips()
     except ElementError as e:
         # send email for confirmation to admin and log issue
