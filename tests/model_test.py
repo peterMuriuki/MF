@@ -51,6 +51,7 @@ def test_registration():
     print(data['user'])
     assert(type(data['user']) is dict)
 
+
 def test_registration_from_db():
     """Test the registration mechanism from the database point of view"""
     users = Users.query.all()
@@ -63,6 +64,7 @@ def test_user_instance_from_db():
     assert(user is not None)
     assert(user.email == "Pmui@gmail.com")
     assert(not user.admin)
+
 
 def test_login():
     """This function checks that login is as intended """
@@ -77,6 +79,7 @@ def test_login():
     global token
     assert(data['token'])
     assert(data['admin'] == False)
+
 
 def test_predictions():
     """folow up on the above tests:

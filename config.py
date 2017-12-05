@@ -25,6 +25,10 @@ class MiddleWare(Configuration):
     MAIL_PORT = 587
 
 
+class HerokuConfiguration(MiddleWare):
+    """Different settings for heroku deployable application"""
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+
 class DevelopmentConfiguration(MiddleWare):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_base_uri, 'development.db')
@@ -47,5 +51,6 @@ config = {
     'development': DevelopmentConfiguration,
     'testing': TestingConfiguration,
     'production': ProductionConfiguration,
-    'default' : DevelopmentConfiguration
+    'default' : DevelopmentConfiguration,
+    'heroku': HerokuConfiguration
 }
