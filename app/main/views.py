@@ -163,10 +163,10 @@ class Tips(Resource):
         from datetime import datetime as cal
         date = dt.today()
         today = cal(date.year, date.month, date.day, 0, 0, 0)
-        # if self.admin:
-        #     predictions = Predictions.query.filter(Predictions.date_time >= today).all()
-        # else:
-        predictions = Predictions.query.filter(Predictions.date_time >= today).filter(Predictions.approved == True).all()
+        if self.admin:
+            predictions = Predictions.query.filter(Predictions.date_time >= today).all()
+        else:
+            predictions = Predictions.query.filter(Predictions.date_time >= today).filter(Predictions.approved == True).all()
         list_ = []
         for prediction in predictions:
             list_.append(prediction)
