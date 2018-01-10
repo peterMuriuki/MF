@@ -42,7 +42,7 @@ def test_full_scrapper(file):
 
 @pytest.mark.parametrize('file', re_abs_files)
 def test_remainder_pages_scrapper(file):
-    """SEcond scrap functionality: the one that relies on count"""
+    """Second scrap functionality: the one that relies on count"""
     response = get_all_other_tips(file=file)
     assert type(response) is dict
 

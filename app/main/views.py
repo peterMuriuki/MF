@@ -81,6 +81,7 @@ class Tips_id(Resource):
         boolean approved field by default
         input: -> the Prediction's prediction_key from decoded secret key
         output: -> message; and object details"""
+        int(pred_id)
         data = request.get_json()
         if data is None:
             pred_obj = Predictions.query.filter_by(id=pred_id).first()
@@ -105,6 +106,7 @@ class Tips_id(Resource):
         input: -> prediction id
         output: -> a dictionary containing the single prediction id
         """
+        int(pred_id)
         pred_obj = Predictions.query.filter_by(id=pred_id).first()
         if pred_obj is None:
             return {'message': 'prediction not found'}, 404
@@ -119,6 +121,7 @@ class Tips_id(Resource):
         """removes the prediction instance
         input: -> encoded secret key with the predictions prediction_id
         output: -> message"""
+        int(pred_id)
         pred_obj = Predictions.query.filter_by(id=pred_id).first()
         done = tipster.delete_prediction(pred_obj)
         if done:

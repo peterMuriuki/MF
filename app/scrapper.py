@@ -143,7 +143,7 @@ def all_other_tips_compiler(data_list):
     than one"""
     doi = all_tips_occurrence_checker(data_list)  #  list of interest
     for diction in doi:
-        if diction['count'] > 1 and instance_unique_checker(diction['prediction_id']):
+        if diction['count'] > 1 and instance_unique_checker(diction['prediction_id']) and prediction_uniqueness_checker():
             tipster.add_prediction(diction)
     return True
 
@@ -253,7 +253,7 @@ def save_prediction(data):
     """The workaround, the functions incharge of requesting the respecive data will also be incharge of saving the predictions"""
     # this function should work for many dictionaries or even one dictioary instance
     for diction in data:
-        if instance_unique_checker(diction['prediction_id']):
+        if instance_unique_checker(diction['prediction_id']) and prediction_uniqueness_checker(diction):
             tipster.add_prediction(diction)
     return True
 
@@ -279,6 +279,17 @@ def instance_unique_checker(pred_id):
         return False
     elif response is None:
         return True
+
+def prediction_uniqueness_checker(diction):
+    """
+    :param: a dictionary instance of the prediction data to be checked if existent
+    checks if the prediction's pick is existent and returns False if found else returns True """
+    response = Predictions.query.filter_by(fixture=diction['fixture']).filter_by(pick=diction['pick']).first()
+    if response:
+        return False
+    elif response is None:
+        return True
+
 
 def time_splitter(string):
     """This function will derive the hour and minutes that a game will be played from a string
