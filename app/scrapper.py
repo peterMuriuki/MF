@@ -143,7 +143,7 @@ def all_other_tips_compiler(data_list):
     than one"""
     doi = all_tips_occurrence_checker(data_list)  #  list of interest
     for diction in doi:
-        if diction['count'] > 1 and instance_unique_checker(diction['prediction_id']) and prediction_uniqueness_checker():
+        if diction['count'] > 1 and instance_unique_checker(diction['prediction_id']) and prediction_uniqueness_checker(diction):
             tipster.add_prediction(diction)
     return True
 
