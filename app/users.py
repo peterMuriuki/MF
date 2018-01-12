@@ -1,6 +1,7 @@
 """ 
 users class template : Models the fields and behaviours expected of a user
 """
+from flask import current_app
 from . import db
 from sqlalchemy.exc import OperationalError
 from werkzeug.security import generate_password_hash
@@ -39,8 +40,33 @@ class Users(db.Model):
         self.bankroll = bankroll
 
     @staticmethod
-    def insert_admin():
+    def insert_test_admin():
         """ add the super user admin"""
+        db.drop_all()
+        db.create_all()
+        app = current_app._get_current_object()
+        name = app.config['EANMBLE_ADMIN_NAME']
+        email = app.config['EANMBLE_ADMIN_EMAIL']
+        password = app.config['EANMBLE_ADMIN_PASSWORD']
+        user_name = app.config['EANMBLE_ADMIN_USER_NAME']
+        admin = True
+        phone_number = app.config['EANMBLE_ADMIN_PHONE_NUMBER']
+        bankroll = None
+        plan = None
+        admin = Users(name = name, user_name=user_name, email=email, password=password, admin=admin, phone_number=phone_number, bankroll=bankroll, plan=plan)
+        try:
+            db.session.add(admin)
+            db.session.commit()
+        except OperationalError as e:
+            db.session.rollback()
+            return False
+        return True
+
+    @staticmethod
+    def insert_admin():
+        """Add a test super user account"""
+        db.drop_all()
+        db.create_all()
         name = os.environ.get('EANMBLE_ADMIN_NAME')
         email = os.environ.get('EANMBLE_ADMIN_EMAIL')
         password = os.environ.get('EANMBLE_ADMIN_PASSWORD')
