@@ -21,12 +21,11 @@ manager.add_command('shell', Shell(make_context=make_shell_context))
 def deploy():
     """Define all the deploy operations once and in a encapsulated manner """
     # create the tables
-
-    db.create_all()
     
-    if app.config['CONFIGURATION'] == 'production':
-        Users.insert_admin()
-
+    if os.environ['CONFIGURATION'] == 'production' or os.environ['CONFIGURATION'] == 'heroku':
+        Users.insert_admin() # will wok for all application configurations
+    else:
+        Users.insert_test_admin()
 
     """
     DEPLOYMENT PROCEDURE

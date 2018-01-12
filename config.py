@@ -37,6 +37,12 @@ class DevelopmentConfiguration(MiddleWare):
 class TestingConfiguration(MiddleWare):
     TESTING = True
     DEBUG = True
+    # the below data is fictional
+    EANMBLE_ADMIN_NAME = "CAPTAINPRICE"
+    EANMBLE_ADMIN_EMAIL = "EANMBLE@GMAIL.com"
+    EANMBLE_ADMIN_PASSWORD = "AD ARGA ADADSFA"
+    EANMBLE_ADMIN_USER_NAME = "CAPTAINPRICE"
+    EANMBLE_ADMIN_PHONE_NUMBER = '0225468'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_base_uri, 'testing.db')
 
 
