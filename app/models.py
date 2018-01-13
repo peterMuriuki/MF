@@ -98,7 +98,7 @@ class Tipster(object):
     def modify_prediction(self, data, pred_obj):
         """Modifies a prediction data members irrespective of whatever fields to be chamged
         fields that can be sensfully changed: """
-        changeable = ['approved', 'home_score', 'away_score', 'comment']
+        changeable = ['approved', 'home_score', 'away_score', 'comments']
         for key in data.keys():
             if key not in changeable:
                 raise Exception('Key invalid')

@@ -83,6 +83,7 @@ class Tips_id(Resource):
         output: -> message; and object details"""
         int(pred_id)
         data = request.get_json()
+        # print(data) -> what if the json field is not None but does not conatin the required information
         if data is None:
             pred_obj = Predictions.query.filter_by(id=pred_id).first()
             pred_obj = tipster.approve_prediction(pred_obj)
@@ -93,7 +94,7 @@ class Tips_id(Resource):
         else:
             # tipster modify prediction
             pred_obj = Predictions.query.filter_by(id=pred_id).first()
-            pred_obj = tipster.modify_prediction(pred_obj, data)
+            pred_obj = tipster.modify_prediction(data, pred_obj)
             return {
                 'message':'Prediction {} succesfully modified'.format(pred_id),
                 "prediction": pred_schema.dump(pred_obj).data
