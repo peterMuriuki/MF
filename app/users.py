@@ -39,6 +39,16 @@ class Users(db.Model):
         """called upon once a user decides to credit his acount with cash"""
         self.bankroll = bankroll
 
+    def set_phone_number(self, phone_number):
+        """ it is not all that imperative that a user acoount should hold the users phone number at registration
+        this interface will facilitate such updates after the user has registered and he/she can update the information
+        at their an arbitrary point in time
+        :param: a phone number in form of a string
+        :returns: None or raise error if input is not string"""
+        if not isinstance(phone_number, str):
+            raise ValueError("Unexpected input for phone number, should be string")
+        self.phone_number = phone_number
+
     @staticmethod
     def insert_test_admin():
         """ add the super user admin"""

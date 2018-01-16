@@ -79,6 +79,8 @@ class Tipster(object):
         user_name = data.get('user_name')
         password = data.get('password')
         plan = data.get('plan')
+        bankroll = data.get('bankroll')
+        phone_number = data.get('phone_number')
 
 
         if name is not None:
@@ -91,6 +93,10 @@ class Tipster(object):
             user.password = password
         if plan is not None:
             user.plan = plan
+        if bankroll is not None:
+            user.set_bankroll(bankroll)
+        if phone_number is not None:
+            user.set_phone_number(phone_number)
 
         db.session.commit()
         return user
