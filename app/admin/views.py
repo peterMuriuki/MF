@@ -202,33 +202,42 @@ class RERegister(User):
         if user.admin:
             # means we are promoting user
             if not current_user.admin:
-                current_user.admin = True
+                data = {
+                    "admin": True
+                }
+                tipster.modify_sharp(data, current_user)
                 return {'message': 'user successfully modified',
                     'user': user_schema.dump(current_user).data
                     }
             else:
-                current_user.admin = False
-                return {'message': 'user succesfully modified',
+                data = {
+                    "admin": False
+                }
+                tipster.modify_sharp(data, current_user)
+                return {
+                    'message': 'user succesfully modified',
                     'user': user_schema.dump(current_user).data
                     }
-        if user.id != current_user.id:
+        elif user.id != current_user.id:
             return {'message': 'Method not allowed'}, 405
-        data = request.get_json()
-        # we know just modify the new information
-        response_obj = tipster.modify_sharp(data, current_user)
-        if response_obj:
-            return {'message': 'user successfully modified',
-                    'user': user_schema.dump(response_obj).data
-                    }
-        else:
-            return {'message': 'error with the keys', 'sample':
-                {
-                    "name": "<name>",
-                    "email": "<email>",
-                    "user_name": "<user_name>",
-                    "password": "<password>",
-                    "plan": "<plan>"
-                }}, 304
+        elif user.id == current_user.id:
+            # shows that we are dealing with the same person, simply the user is trying to modify his/her own account
+            data = request.get_json()
+            response_obj = tipster.modify_sharp(data, user)
+
+            if response_obj:
+                return {'message': 'user successfully modified',
+                        'user': user_schema.dump(response_obj).data
+                        }
+            else:
+                return {'message': 'error with the keys', 'sample':
+                    {
+                        "name": "<name>",
+                        "email": "<email>",
+                        "user_name": "<user_name>",
+                        "password": "<password>",
+                        "plan": "<plan>"
+                    }}, 304
 
     @admin_eyes
     def delete(self, user, user_id):
