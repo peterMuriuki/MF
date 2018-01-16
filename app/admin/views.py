@@ -104,6 +104,8 @@ class Register(User):
         "email": "<email>",
         "user_name": "<user_name>",
         "password": "<password>"
+
+        :returns: json object with fields: id, name, user_name,... check documentation
         """
         data = request.get_json()
         try:
