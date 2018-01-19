@@ -48,6 +48,10 @@ class users:
         else:
             raise ValueError("Unexpected value for plan")
 
+    def wager(self):
+        """wager, update the bankroll, generate the report, update the database"""
+        pass
+
 
 class Plans(object):
     """the base class that models all the other plans"""

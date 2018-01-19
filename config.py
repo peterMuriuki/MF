@@ -24,25 +24,29 @@ class MiddleWare(Configuration):
     MAIL_SERVER = 'smtp.googlemail.com'
     MAIL_PORT = 587
 
-
-class HerokuConfiguration(MiddleWare):
-    """Different settings for heroku deployable application"""
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-
-class DevelopmentConfiguration(MiddleWare):
-    DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_base_uri, 'development.db')
-
-
-class TestingConfiguration(MiddleWare):
-    TESTING = True
-    DEBUG = True
+class TeDev(MiddleWare):
+    """test variables for creating the test_super_user_account"""
     # the below data is fictional
     EANMBLE_ADMIN_NAME = "CAPTAINPRICE"
     EANMBLE_ADMIN_EMAIL = "EANMBLE@GMAIL.com"
     EANMBLE_ADMIN_PASSWORD = "AD ARGA ADADSFA"
     EANMBLE_ADMIN_USER_NAME = "CAPTAINPRICE"
     EANMBLE_ADMIN_PHONE_NUMBER = '0225468'
+
+
+class HerokuConfiguration(MiddleWare):
+    """Different settings for heroku deployable application"""
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+
+
+class DevelopmentConfiguration(TeDev):
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_base_uri, 'development.db')
+
+
+class TestingConfiguration(TeDev):
+    TESTING = True
+    DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_base_uri, 'testing.db')
 
 

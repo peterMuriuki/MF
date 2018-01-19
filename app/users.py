@@ -29,7 +29,7 @@ class Users(db.Model):
 
     def __repr__(self):
         """__repr__"""
-        return "<user{} {} {} {}".format(self.id, self.user_name, self.email, self.admin)
+        return "<user{} {} {} {}>".format(self.id, self.user_name, self.email, self.admin)
 
     def set_plan(self, plan):
         """ Sets the plan as a string represetntations of the class name"""

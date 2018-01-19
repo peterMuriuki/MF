@@ -25,7 +25,7 @@ user_schema = UsersSchema()
 
 def token_required(f):
     @wraps(f)
-    def decorated(*args, **kwargs):
+    def decorated(self, *args, **kwargs):
         """
         returns an instance of the user class else returns a None object if the user is not found
         """
@@ -44,14 +44,13 @@ def token_required(f):
             return {'message': 'Token is invalid'}, 401
         if person is None:
             return {'message': 'Token is invalid'}, 401
-
-        return f(person, *args, **kwargs)
+        return f(self, person, *args, **kwargs)
     return decorated
 
 
 def admin_eyes(f):
     @wraps(f)
-    def decorated(*args, **kwargs):
+    def decorated(self, *args, **kwargs):
         """
         returns an instance of the user class else returns a None object if the user is not found
         """
@@ -71,7 +70,7 @@ def admin_eyes(f):
         if person is None:
             return {'message': 'Token is invalid'}, 401
         if person.admin:
-            return f(*args, **kwargs)
+            return f(self, *args, **kwargs)
         return {'message': 'User is forbidden'}, 403
     return decorated
 

@@ -48,7 +48,6 @@ def test_registration():
     assert(response.status_code == 201)
     data = json.loads(response.data)
     assert(data['message'] == "User account created succesfully")
-    print(data['user'])
     assert(type(data['user']) is dict)
 
 
@@ -88,4 +87,118 @@ def test_predictions():
     assert response.status_code == 200
     data = json.loads(response.data)
 
+def test_user_model_modification():
+    """Checks that a users data can be modified as supposed to"""
+    # add two random normal user accounts and one more super user account
+    user_one_data = {
+        "name": "Uhuru Kenyatta",
+        "email": "uhunye@gmail.com",
+        "user_name": "uhunye",
+        "password": "adasdwe"
+    }
+    user_two_data = {
+        "name": "Raila Omolo odinga",
+        "email": "cord@gmail.com",
+        "user_name": "rao",
+        "password": "adasdwe"
+    }
+    # we will load the super user account variables from the configuration object since they have already been loaded,
+    # after setting rhe configuration to testing
+    Users.insert_test_admin
+    # now we register the two standard user accounts
+    response = client.post(url_for('user.register'), data=j_son.dumps(user_one_data), headers=headers)
+    assert(response.status_code == 201)
+    first_user_id = json.loads(response.data)['user']['id']
+    response = client.post(url_for('user.register'), data=j_son.dumps(user_two_data), headers=headers)
+    assert(response.status_code == 201)
+    second_user_id = json.loads(response.data)['user']['id']
+    # now we login the super user account and use their token credentials to modify the users data(admin property only)
+    # . we will also login as one of the users and test that they too can modify their own credentials
+    Users.insert_test_admin()
+    login_data = {
+        "user_name": "CAPTAINPRICE",
+        "password": "AD ARGA ADADSFA"
+    }
+    response = client.post(url_for('user.login'), data=j_son.dumps(login_data), headers=headers)
+    assert(response.status_code == 200)
+    data  = json.loads(response.data)
+    token = data['token']
+    headers['x-access-token'] = token
+    # now we can try modifying a user account credentials -> the admin trying to make another standard user an admin
+    mod_data = {
+        "name": "ODM Kalonzo",
+        "email": "kalonzo@gmail.com",
+        "user_name": "melon",
+        "password": "cord"
+    }
+    admin_data = {
+        "admin": True
+    }
+    resc = client.put(url_for('user.single', user_id=second_user_id), data=j_son.dumps(admin_data), headers=headers)
+    assert resc.status_code ==
+    # now what if a user wanted to modify their own data -> we login first user and see him try to do it
+
+
+
+
+def test_user_by_admin():
+    """:goal: to make sure the admin can easily delete a user account, a user can only delete their own account"""
+    # add two random normal user accounts and one more super user account
+    user_one_data = {
+        "name": "kalonzo Musyoka",
+        "email": "melon@gmail.com",
+        "user_name": "uncle",
+        "password": "adasdwe"
+    }
+    user_two_data = {
+        "name": "samoei arap ruto",
+        "email": "land@gmail.com",
+        "user_name": "hustler",
+        "password": "adasdwe"
+    }
+    # we will load the super user account variables from the configuration object since they have already been loaded,
+    # after setting rhe configuration to testing
+    Users.insert_test_admin()
+    # now we register the two standard user accounts
+    response = client.post(url_for('user.register'), data=j_son.dumps(user_one_data), headers=headers)
+    assert(response.status_code == 201)
+    kalonzo_id = json.loads(response.data)['user']['id']
+    response = client.post(url_for('user.register'), data=j_son.dumps(user_two_data), headers=headers)
+    assert(response.status_code == 201)
+    ruto_id = json.loads(response.data)['user']['id']
+    # we know login as one of the standard users and try to delete the other user which should fail
+    kalonzo_login_data = {
+        "user_name": "uncle",
+        "password": "adasdwe"
+    }
+    response = client.post(url_for('user.login'), data=j_son.dumps(kalonzo_login_data), headers=headers)
+    assert response.status_code == 200
+    kalonzo_token = json.loads(response.data)['token']
+    headers['x-access-token'] = kalonzo_token
+    response = client.delete(url_for('user.single', user_id=ruto_id), headers=headers)
+    assert response.status_code == 405
+    assert json.loads(response.data)['message'] == 'Method not allowed for you'
+    # now what if kalonzo deleted their own account: that should be okay
+    response = client.delete(url_for('user.single', user_id=kalonzo_id), headers=headers)
+    assert response.status_code == 200
+    assert json.loads(response.data)['message'] == 'Account deleted successfully'
+    headers['x-access-token'] = None
+
+    # Now its the administrator time to have some fun deleting users he does not like
+    login_data = {
+        "user_name": "CAPTAINPRICE",
+        "password": "AD ARGA ADADSFA"
+    }
+    response = client.post(url_for('user.login'), data=j_son.dumps(login_data), headers=headers)
+    assert(response.status_code == 200)
+    data  = json.loads(response.data)
+    token = data['token']
+    headers['x-access-token'] = token
+    response = client.delete(url_for('user.single', user_id=ruto_id), headers=headers)
+    assert response.status_code == 200
+    assert json.loads(response.data)['message'] == 'Account deleted successfully'
+
+    # if we now tried logging in the other two standard user accounts, it would return an error message
+    response = client.post(url_for('user.login'), data=j_son.dumps(kalonzo_login_data), headers=headers)
+    assert response.status_code == 401
 
