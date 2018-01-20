@@ -137,9 +137,6 @@ class Tips(Resource):
     post -> add predictions to the database
     """
 
-    def __init__(self):
-        pass
-
     @admin_eyes
     @token_required
     def post(self):
@@ -167,7 +164,7 @@ class Tips(Resource):
         from datetime import datetime as cal
         date = dt.today()
         today = cal(date.year, date.month, date.day, 0, 0, 0)
-        if self.admin:
+        if current_user.admin:
             predictions = Predictions.query.filter(Predictions.date_time >= today).all()
         else:
             predictions = Predictions.query.filter(Predictions.date_time >= today).filter(Predictions.approved == True).all()

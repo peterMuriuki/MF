@@ -135,10 +135,28 @@ def test_user_model_modification():
         "admin": True
     }
     resc = client.put(url_for('user.single', user_id=second_user_id), data=j_son.dumps(admin_data), headers=headers)
-    assert resc.status_code ==
+    assert resc.status_code == 200
     # now what if a user wanted to modify their own data -> we login first user and see him try to do it
-
-
+    login_data = {
+        "user_name": "uhunye",
+        "password": "adasdwe"
+    }
+    response = client.post(url_for('user.login'), data=j_son.dumps(login_data), headers=headers)
+    assert response.status_code == 200
+    headers['x-access-token'] = json.loads(response.data)['token']
+    response = client.put(url_for('user.single', user_id=second_user_id), data=j_son.dumps(mod_data), headers=headers)
+    assert response.status_code == 405
+    response = client.put(url_for('user.single', user_id=first_user_id), data=j_son.dumps(mod_data), headers=headers)
+    assert response.status_code == 200
+    # check that first user cannot login with the original details anymore
+    response = client.post(url_for('user.login'), data=j_son.dumps(login_data), headers=headers)
+    assert response.status_code != 200
+    login_data = {
+        "user_name": "uhunye",
+        "password": "adasdwe"
+    }
+    response = client.post(url_for('user.login'), data=j_son.dumps(login_data), headers=headers)
+    assert response.status_code == 200
 
 
 def test_user_by_admin():
