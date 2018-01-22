@@ -77,14 +77,18 @@ class Tips_id(Resource):
     @admin_eyes
     @token_required
     def put(self, current_user, pred_id):
-        """ updates the data memebers of a prediction instance, if json body is empty it only updates the
+        """ updates the data members of a prediction instance, if json body is empty it only updates the
         boolean approved field by default
         input: -> the Prediction's prediction_key from decoded secret key
         output: -> message; and object details"""
         int(pred_id)
         data = request.get_json()
-        # print(data) -> what if the json field is not None but does not conatin the required information
-        if data is None:
+        # print(data) -> what if the json field is not None but does not contain the required information
+        if 'approved' in data:
+            data_validity = True
+        else:
+            data_validity = False
+        if not data_validity:
             pred_obj = Predictions.query.filter_by(id=pred_id).first()
             pred_obj = tipster.approve_prediction(pred_obj)
             return {
