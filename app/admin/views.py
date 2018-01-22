@@ -190,7 +190,7 @@ class Login(User):
             else:
                 token = jwt.encode({'user_id': user.id}, key)
             return jsonify({'token': token.decode("UTF-8"), 'admin': user.admin})
-        return login_failed('Password not found {}'.format(password))
+        return login_failed('Password does not match {}'.format(password))
 
 
 class RERegister(User):
@@ -198,6 +198,9 @@ class RERegister(User):
     def put(self, user, user_id):
         """Modification of an existing account instance by the account owner"""
         current_user = Users.query.filter_by(id=user_id).first()
+        # what if the current user is of a non_existent person-> implies None
+        if current_user is None:
+            return {"message": "Bad request, the user whose data is to be modified was not found"}, 400
         if user.admin:
             # means we are promoting user
             if not current_user.admin:
@@ -238,18 +241,18 @@ class RERegister(User):
                         "plan": "<plan>"
                     }}, 304
 
-    @admin_eyes
+    @token_required
     def delete(self, user, user_id):
         """admin_eyes and accounts owner eyes only"""
         current_user = Users.query.filter_by(id=user_id).first()
-        if user.id != current_user.id or not user.admin:
-            return {'message': 'Method not allowed'}, 405 
-        done = tipster.delete_sharp(user)
-        if done:
-            return {'message': 'user deleted'}
+        if user.id == current_user.id or user.admin:
+            done = tipster.delete_sharp(user)
+            if done:
+                return {'message': 'Account deleted successfully'}
+            else:
+                return {'message': 'Account not deleted'}, 304
         else:
-            return {'message': 'user not deleted'}, 304
-
+            return {'message': 'Method not allowed'}, 403
 
 api.add_resource(Register, '/register')
 api.add_resource(RERegister, '/<int:user_id>')

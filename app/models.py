@@ -7,6 +7,7 @@ from .users import *
 from .predictions import *
 from .plan import *
 import os
+from werkzeug.security import generate_password_hash
 
 
 class Tipster(object):
@@ -90,7 +91,7 @@ class Tipster(object):
         if user_name is not None:
             user.user_name = user_name
         if password is not None:
-            user.password = password
+            user.password = generate_password_hash(password)
         if plan is not None:
             user.plan = plan
         if bankroll is not None:

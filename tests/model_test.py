@@ -43,7 +43,7 @@ def test_registration():
         "password": "adasdwe"
     }'''
     # kwani how is one supposed to package a json payload to a post request -> not as from data
-        # answer the data payload containing the json data should be added as type str
+    # answer the data payload containing the json data should be added as type str
     response = client.post(url_for('user.register'), data=data, headers=headers)
     assert(response.status_code == 201)
     data = json.loads(response.data)
@@ -80,12 +80,12 @@ def test_login():
     assert(data['admin'] == False)
 
 
-def test_predictions():
-    """folow up on the above tests:
-    registration -> login -> and now viewing the predictions"""
-    response = client.get(url_for('main.tips'), headers={'x-access-token':token})
-    assert response.status_code == 200
-    data = json.loads(response.data)
+# def test_predictions():  -> requires mock patching
+#     """folow up on the above tests:
+#     registration -> login -> and now viewing the predictions"""
+#     response = client.get(url_for('main.tips'), headers={'x-access-token':token})
+#     assert response.status_code == 200
+#     data = json.loads(response.data)
 
 def test_user_model_modification():
     """Checks that a users data can be modified as supposed to"""
@@ -104,7 +104,7 @@ def test_user_model_modification():
     }
     # we will load the super user account variables from the configuration object since they have already been loaded,
     # after setting rhe configuration to testing
-    Users.insert_test_admin
+    Users.insert_test_admin()
     # now we register the two standard user accounts
     response = client.post(url_for('user.register'), data=j_son.dumps(user_one_data), headers=headers)
     assert(response.status_code == 201)
@@ -114,7 +114,6 @@ def test_user_model_modification():
     second_user_id = json.loads(response.data)['user']['id']
     # now we login the super user account and use their token credentials to modify the users data(admin property only)
     # . we will also login as one of the users and test that they too can modify their own credentials
-    Users.insert_test_admin()
     login_data = {
         "user_name": "CAPTAINPRICE",
         "password": "AD ARGA ADADSFA"
@@ -152,8 +151,8 @@ def test_user_model_modification():
     response = client.post(url_for('user.login'), data=j_son.dumps(login_data), headers=headers)
     assert response.status_code != 200
     login_data = {
-        "user_name": "uhunye",
-        "password": "adasdwe"
+        "user_name": "melon",
+        "password": "cord"
     }
     response = client.post(url_for('user.login'), data=j_son.dumps(login_data), headers=headers)
     assert response.status_code == 200
@@ -194,8 +193,8 @@ def test_user_by_admin():
     kalonzo_token = json.loads(response.data)['token']
     headers['x-access-token'] = kalonzo_token
     response = client.delete(url_for('user.single', user_id=ruto_id), headers=headers)
-    assert response.status_code == 405
-    assert json.loads(response.data)['message'] == 'Method not allowed for you'
+    assert response.status_code == 403
+    assert json.loads(response.data)['message'] == 'Method not allowed'
     # now what if kalonzo deleted their own account: that should be okay
     response = client.delete(url_for('user.single', user_id=kalonzo_id), headers=headers)
     assert response.status_code == 200
@@ -219,4 +218,3 @@ def test_user_by_admin():
     # if we now tried logging in the other two standard user accounts, it would return an error message
     response = client.post(url_for('user.login'), data=j_son.dumps(kalonzo_login_data), headers=headers)
     assert response.status_code == 401
-
