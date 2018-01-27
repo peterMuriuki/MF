@@ -84,7 +84,7 @@ class Tips_id(Resource):
         int(pred_id)
         data = request.get_json()
         # print(data) -> what if the json field is not None but does not contain the required information
-        if 'approved' in data:
+        if data is not None and 'approved' in data:
             data_validity = True
         else:
             data_validity = False
