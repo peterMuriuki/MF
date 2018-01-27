@@ -22,7 +22,7 @@ class Predictions(db.Model):
     away_score = db.Column(db.Integer(), nullable=True)
     sport = db.Column(db.String(20), nullable=True)
     count = db.Column(db.Integer(), nullable=True)
-    comment= db.Column(db.Text(), nullable=True)
+    comment= db.Column(db.Text(), default="", nullable=True)
 
     def __repr__(self):
         """returns/displays an arbitrary representation of a row"""

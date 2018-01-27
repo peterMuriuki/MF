@@ -85,25 +85,19 @@ class Tips_id(Resource):
         data = request.get_json()
         # print(data) -> what if the json field is not None but does not contain the required information
         if data is not None and 'approved' in data:
-            data_validity = True
+            pred_obj = Predictions.query.filter_by(id=pred_id).first()
+            pred_obj = tipster.modify_prediction(data, pred_obj)
+            return {
+                'message':'Prediction {} successfully modified'.format(pred_id),
+                "prediction": pred_schema.dump(pred_obj).data
+            }, 201
         else:
-            data_validity = False
-        if not data_validity:
             pred_obj = Predictions.query.filter_by(id=pred_id).first()
             pred_obj = tipster.approve_prediction(pred_obj)
             return {
                     'message': 'approved {}'.format(pred_id),
                     "prediction": pred_schema.dump(pred_obj).data
                 }, 201
-        else:
-            # tipster modify prediction
-            pred_obj = Predictions.query.filter_by(id=pred_id).first()
-            pred_obj = tipster.modify_prediction(data, pred_obj)
-            return {
-                'message':'Prediction {} succesfully modified'.format(pred_id),
-                "prediction": pred_schema.dump(pred_obj).data
-            }, 201
-
 
     @token_required
     def get(self, current_user, pred_id):
