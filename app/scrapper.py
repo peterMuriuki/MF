@@ -307,7 +307,7 @@ def time_splitter(string):
     except :
         #send an email: refused to cast into integer
         pass
-    if not 0 >= hour <= 23 and not 0 >= minute <= 59:
+    if not 0 <= hour < 24 and not 0 <= minute < 60:
         # send an email: data integrity broken
         pass
     return [hour, minute]
