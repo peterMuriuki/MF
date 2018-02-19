@@ -17,7 +17,7 @@ class Predictions(db.Model):
     pick = db.Column(db.String(35))
     confidence = db.Column(db.Float())
     odds = db.Column(db.Float())
-    approved = db.Column(db.Boolean())
+    approved = db.Column(db.Integer())
     home_score = db.Column(db.Integer(), nullable=True)
     away_score = db.Column(db.Integer(), nullable=True)
     sport = db.Column(db.String(20), nullable=True)
@@ -30,7 +30,7 @@ class Predictions(db.Model):
      self.tipster_url, self.pick, self.confidence, self.odds, self.approved, self.sport, self.count)
 
     def __init__(self, prediction_id, fixture, tipster_url, tipster_name, pick,
-    confidence, odds, _time=datetime.utcnow(), sport='', approve=False, count=0, home_score=None,
+    confidence, odds, _time=datetime.utcnow(), sport='', approve=0, count=0, home_score=None,
     away_score=None):
         self.prediction_id = prediction_id
         self.fixture = fixture
@@ -48,7 +48,12 @@ class Predictions(db.Model):
 
     def approve(self):
         """After a prediction is looked up and approved by admin; set confirm to True"""
-        self.approved = True
+        self.approved = 2
+        db.session.commit()
+
+    def stage(self):
+        """we first go through staging so that we can approve"""
+        self.approved = 1
         db.session.commit()
 
     def set_score(self, home_score, away_score):
@@ -76,7 +81,7 @@ class PredictionsSchema(Schema):
     pick = fields.String()
     confidence = fields.Float()
     odds = fields.Float()
-    approved = fields.Boolean()
+    approved = fields.Integer()
     sport = fields.String()
     count = fields.Integer()
     comment = fields.String()
