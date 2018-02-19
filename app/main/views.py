@@ -173,6 +173,22 @@ class Tips(Resource):
         return {'predictions': result.data}
 
 
+class Predictions(Resource):
+    """
+    Get: return saved predictions for a certain period of time
+    """
+    def get(self, start_date, end_date):
+        """Filter predictions from the start date through to the end date"""
+        diction = {}
+        while start_date <= end_date:
+            predictions = Predictions.query.filter(Predictions.date_time >=
+                                               start_date).filter(Predictions.approved == 2)
+            key = start_date.strftime('%m/%d/%Y')
+            diction[key] = predschema.dump(predictions)
+            start_date.day += 1
+        return {"predictions": diction}
 
+
+api.add_resource(Predictions, '/predictions/<string:start_date>/<string:end_date>')
 api.add_resource(Tips_id, '/predictions/<string:pred_id>' )
 api.add_resource(Tips, '/predictions/')
