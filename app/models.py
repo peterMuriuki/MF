@@ -20,6 +20,11 @@ class Tipster(object):
         db.session.commit()
         return prediction_obj
 
+    def stage_prediction(self, prediction_obj):
+        prediction_obj.stage()
+        db.session.commit()
+        return prediction_obj
+
     def get_all_predictions(self):
         """qeuries the Predictions relations for all existent predictions
         output:-> returns them as a dictionary of lists"""

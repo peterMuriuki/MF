@@ -165,7 +165,7 @@ class Tips(Resource):
         if current_user.admin:
             predictions = Predictions.query.filter(Predictions.date_time >= today).all()
         else:
-            predictions = Predictions.query.filter(Predictions.date_time >= today).filter(Predictions.approved == True).all()
+            predictions = Predictions.query.filter(Predictions.date_time >= today).filter(Predictions.approved == 2).all()
         list_ = []
         for prediction in predictions:
             list_.append(prediction)

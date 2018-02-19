@@ -58,7 +58,7 @@ def test_modify_predictions_standard_case():
     change only the defined data members of the respective project
     """
     data = {
-        "approved": True,
+        "approved": 2,
         "home_score": 20,
         "away_score": 30,
         "comment": "this is the Super user comment"
@@ -70,7 +70,7 @@ def test_modify_predictions_standard_case():
     assert pred.comment is None
     mod = tipster.modify_prediction(data, pred)
     assert mod.id == 1
-    assert mod.approved
+    assert mod.approved == 2
     assert mod.home_score == 20
     assert mod.away_score == 30
     assert mod.comment == "this is the Super user comment"
