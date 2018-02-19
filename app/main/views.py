@@ -5,7 +5,8 @@ from flask_restful import Resource, Api, fields
 from ..models import Tipster, Predictions, PredictionsSchema
 from ..scrapper import run
 from flask import Blueprint
-
+from datetime import timedelta
+import datetime
 
 main = Blueprint('main', __name__)
 
@@ -173,22 +174,34 @@ class Tips(Resource):
         return {'predictions': result.data}
 
 
-class Predictions(Resource):
+class Preds(Resource):
     """
     Get: return saved predictions for a certain period of time
     """
+
     def get(self, start_date, end_date):
-        """Filter predictions from the start date through to the end date"""
+        """Filter predictions from the start date through to the end date
+        sample: 127.0.0.1:5000/predictions/18-2-2018/20-2-2018
+        sample_reponse: {
+                            "predictions": {
+                                "18-02-2018": [],
+                                "19-02-2018": [],
+                                "20-02-2018": []
+                            }
+                        }
+        """
+        start_date = datetime.datetime.strptime(start_date, '%d-%m-%Y')
+        end_date = datetime.datetime.strptime(end_date, '%d-%m-%Y')
         diction = {}
         while start_date <= end_date:
             predictions = Predictions.query.filter(Predictions.date_time >=
                                                start_date).filter(Predictions.approved == 2)
-            key = start_date.strftime('%m/%d/%Y')
-            diction[key] = predschema.dump(predictions)
-            start_date.day += 1
+            key = start_date.strftime('%d-%m-%Y')
+            diction[key] = predschema.dump(predictions).data
+            start_date += timedelta(days=1)
         return {"predictions": diction}
 
 
-api.add_resource(Predictions, '/predictions/<string:start_date>/<string:end_date>')
+api.add_resource(Preds, '/predictions/<string:start_date>/<string:end_date>')
 api.add_resource(Tips_id, '/predictions/<string:pred_id>' )
 api.add_resource(Tips, '/predictions/')
