@@ -163,8 +163,12 @@ class Tips(Resource):
         from datetime import datetime as cal
         date = dt.today()
         today = cal(date.year, date.month, date.day, 0, 0, 0)
+        q = request.args.get('q')
+        if q is not None:
+            date = datetime.datetime.strptime(q, '%d-%m-%Y')
         if current_user.admin:
-            predictions = Predictions.query.filter(Predictions.date_time >= today).all()
+            predictions = Predictions.query.filter(Predictions.date_time > today)\
+                .filter(Predictions.date_time < date + timedelta(days=1)).all()
         else:
             predictions = Predictions.query.filter(Predictions.date_time >= today).filter(Predictions.approved == 2).all()
         list_ = []
