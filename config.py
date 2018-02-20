@@ -42,6 +42,7 @@ class HerokuConfiguration(MiddleWare):
 class DevelopmentConfiguration(TeDev):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_base_uri, 'development.db')
+    MAIL_USE_TLS = True
 
 
 class TestingConfiguration(TeDev):
