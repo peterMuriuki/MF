@@ -19,7 +19,7 @@ def send_async_email(app, msg):
         mail.send(msg)
 
 def send_email(subject, sender, recipients, text_body, html_body):
-    msg = Message(subject=subject,sender=sender,recipients=recipients)
+    msg = Message(subject=subject, sender=sender, recipients=recipients)
     msg.body = text_body
     msg.html = html_body
     app = current_app._get_current_object()
@@ -28,15 +28,14 @@ def send_email(subject, sender, recipients, text_body, html_body):
 
 class ToAdmin(object):
     """Represents all the templates of actions that will require the application to send emails to 
-    the adminsistrator
+    the administrator
     1 a new subscriber
     2 a new unapproved tip
     3 after the end of the recommended tips -> priority low
     4 an error"""
-    def __init__(self):
-        pass
-    
-    def new_subscriber(self, user_obj):
+
+    @staticmethod
+    def new_subscriber(user_obj):
         """Will send the public details of the new user object to the administrator """
         message = """ 
             to Admin,
@@ -50,17 +49,19 @@ class ToAdmin(object):
         app = current_app._get_current_object()
         subject = "(Hooray)NEW USER"
         html_body = render_template('email/new_user.html', user_obj)
-        send_email(subject, app.config['MAIL_USERNAME'], app.config['WEBMASTER'], message, html_body)
+        send_email(subject, app.config['MAIL_USERNAME'], [app.config['WEBMASTER']], message, html_body)
         return True
 
-    def error(self, error_message):
+    @staticmethod
+    def error( error_message):
         """Forwards an error message to administrator"""
         subject = "SHIT"
         app = current_app._get_current_object()
-        send_email(subject, app.config['MAIL_USERNAME'], app.config['WEBMASTER'], error_message, error_message)
+        send_email(subject, app.config['MAIL_USERNAME'], [app.config['WEBMASTER']], error_message, error_message)
         return True
 
-    def new_prediction(self, predictions):
+    @staticmethod
+    def new_prediction(predictions):
         """Sends informatoion on newly added tips to the administrator"""
         subject = "NEW TIPS"
         message = ""
@@ -68,7 +69,7 @@ class ToAdmin(object):
         for prediction in predictions:
             message += "{} {} {}\n".format(prediction.ficture, prediction.pick, prediction.odds)
         html_body = render_template('email/new_predictions.html', predictions)
-        send_email(subject, app.config['MAIL_USERNAME'], app.config['WEBMASTER'], message, html_body)
+        send_email(subject, app.config['MAIL_USERNAME'], [app.config['WEBMASTER']], message, html_body)
         return True
 
 
@@ -88,7 +89,8 @@ class ToUser(object):
     3 as a welcome message
     """
     # a welcome message:
-    def welcome_email(self, user_obj):
+    @staticmethod
+    def welcome_email(user_obj):
         """Sends  welcome message to a new subscriber"""
         message = """
         hi {}
@@ -107,10 +109,11 @@ class ToUser(object):
         html_body = render_template('email/welcome.html')
         subject = "{EANMBLE}Just Saying Hello"
         app = current_app._get_current_object()
-        send_email(subject, app.config['MAIL_USERNAME'], user_obj.email, message, html_body)
+        send_email(subject, app.config['MAIL_USERNAME'], [user_obj.email], message, html_body)
 
-    def new_approved(self, email_list, predictions):
-        """Emails a list of approved predictions to the emailing list of all users includinf the admin"""
+    @staticmethod
+    def new_approved(email_list, predictions):
+        """ Emails a list of approved predictions to the emailing list of all users including the admin """
         message = ""
         total_odds = 0.00
         app = current_app._get_current_object()
