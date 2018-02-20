@@ -13,3 +13,4 @@ tests/__pycache__/
 /testit.py
 migrations/__pycache__/
 app/static/db/development.db
+/app/static/db/
