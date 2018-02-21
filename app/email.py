@@ -53,7 +53,7 @@ class ToAdmin(object):
         return True
 
     @staticmethod
-    def error( error_message):
+    def error(error_message):
         """Forwards an error message to administrator"""
         subject = "SHIT"
         app = current_app._get_current_object()
@@ -62,12 +62,13 @@ class ToAdmin(object):
 
     @staticmethod
     def new_prediction(predictions):
-        """Sends informatoion on newly added tips to the administrator"""
+        """Sends information on newly added tips to the administrator
+        :param: a list of dictionaries"""
         subject = "NEW TIPS"
         message = ""
         app = current_app._get_current_object()
         for prediction in predictions:
-            message += "{} {} {}\n".format(prediction.ficture, prediction.pick, prediction.odds)
+            message += "{} {} {}\n".format(prediction['fixture'], prediction['pick'], prediction['odds'])
         html_body = render_template('email/new_predictions.html', predictions)
         send_email(subject, app.config['MAIL_USERNAME'], [app.config['WEBMASTER']], message, html_body)
         return True
@@ -115,11 +116,15 @@ class ToUser(object):
     def new_approved(email_list, predictions):
         """ Emails a list of approved predictions to the emailing list of all users including the admin """
         message = ""
+        subject = "Current Approved Predictions"
         total_odds = 0.00
         app = current_app._get_current_object()
         for prediction in predictions:
             message += " {} {} {}\n".format(prediction.fixture, prediction.pick, prediction.odds)
         # we need to include staking information some where in the message
+        html_body = render_template('email/approved.html', predictions)
+        send_email(subject, app.config['MAIL_USERNAME'], email_list, message, html_body)
+        return True
 
     def end_of_tip_session(self):
         """"""
