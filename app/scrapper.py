@@ -10,6 +10,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from .models import Predictions, Tipster
 from .omy import ElementError
+from .email import ToAdmin
 
 tipster = Tipster()
 
@@ -105,6 +106,7 @@ def over_under(string):
         return True
     return False
 
+
 def find_all(pattern, string):
     """"""
     count, start, index = 0, 0, 0
@@ -141,10 +143,14 @@ def all_other_tips_compiler(data_list):
     Input : data_list: a list of dictionaries
     will be in-charge of looking at the dictionaries that have the count key and retrieve those with a count greater
     than one"""
-    doi = all_tips_occurrence_checker(data_list)  #  list of interest
+    doi = all_tips_occurrence_checker(data_list)  # list of interest
+    email_message = []
     for diction in doi:
         if diction['count'] > 1 and instance_unique_checker(diction['prediction_id']) and prediction_uniqueness_checker(diction):
             tipster.add_prediction(diction)
+            email_message.append(diction)
+    # need to send email here
+    ToAdmin.new_prediction(email_message)
     return True
 
 
@@ -252,10 +258,15 @@ def parse_table_rows(tr_list):
 def save_prediction(data):
     """The workaround, the functions incharge of requesting the respecive data will also be incharge of saving the predictions"""
     # this function should work for many dictionaries or even one dictioary instance
+    email_message = []
     for diction in data:
         if instance_unique_checker(diction['prediction_id']) and prediction_uniqueness_checker(diction):
             tipster.add_prediction(diction)
+            email_message.append(diction)
+    # need to send email here
+    ToAdmin.new_prediction(email_message)
     return True
+
 
 def prediction_id_generator(diction):
     """input: dict object.
@@ -279,6 +290,7 @@ def instance_unique_checker(pred_id):
         return False
     elif response is None:
         return True
+
 
 def prediction_uniqueness_checker(diction):
     """
@@ -320,12 +332,12 @@ def run():
         get_picks_from_tipsters_with_the_best_efficiency(soup)
     except ElementError as e:
         # send email for confirmation to admin and log issue
-        pass
+        ToAdmin.error(e.__repr__())
     try:
         get_all_other_tips()
     except ElementError as e:
         # send email for confirmation to admin and log issue
-        pass
+        ToAdmin.error(e.__repr__())
 
 if __name__ == '__main__':
     run()
