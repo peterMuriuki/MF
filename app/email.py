@@ -14,7 +14,7 @@ def async(f):
 
 @async
 def send_async_email(app, msg):
-    """requires an active applcation context and the msg"""
+    """requires an active application context and the msg"""
     with app.app_context():
         mail.send(msg)
 
@@ -48,7 +48,7 @@ class ToAdmin(object):
             """.format(user_obj.name, user_obj.user_name, user_obj.email)
         app = current_app._get_current_object()
         subject = "(Hooray)NEW USER"
-        html_body = render_template('email/new_user.html', user_obj)
+        html_body = render_template('email/new_user.html', user_obj = user_obj)
         send_email(subject, app.config['MAIL_USERNAME'], [app.config['WEBMASTER']], message, html_body)
         return True
 
@@ -69,7 +69,7 @@ class ToAdmin(object):
         app = current_app._get_current_object()
         for prediction in predictions:
             message += "{} {} {}\n".format(prediction['fixture'], prediction['pick'], prediction['odds'])
-        html_body = render_template('email/new_predictions.html', predictions)
+        html_body = render_template('email/new_predictions.html', predictions = predictions)
         send_email(subject, app.config['MAIL_USERNAME'], [app.config['WEBMASTER']], message, html_body)
         return True
 
@@ -107,7 +107,7 @@ class ToUser(object):
         Eanmble_ts admin
         """.format(user_obj.name)
 
-        html_body = render_template('email/welcome.html')
+        html_body = render_template('email/welcome.html', user_obj= user_obj)
         subject = "{EANMBLE}Just Saying Hello"
         app = current_app._get_current_object()
         send_email(subject, app.config['MAIL_USERNAME'], [user_obj.email], message, html_body)
@@ -122,7 +122,7 @@ class ToUser(object):
         for prediction in predictions:
             message += " {} {} {}\n".format(prediction.fixture, prediction.pick, prediction.odds)
         # we need to include staking information some where in the message
-        html_body = render_template('email/approved.html', predictions)
+        html_body = render_template('email/approved.html', predictions=predictions)
         send_email(subject, app.config['MAIL_USERNAME'], email_list, message, html_body)
         return True
 
