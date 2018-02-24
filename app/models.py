@@ -140,3 +140,9 @@ class Tipster(object):
         except OperationalError as e:
             db.session.rollback()
         return True
+
+
+    def send_approved_predictions(self, emails, predictions):
+        """:parameter a list of predictions that will be passed to an email template
+        : parameter: a lit of emails that would like to receive tips"""
+        ToUser.new_approved(emails, predictions)

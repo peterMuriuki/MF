@@ -206,6 +206,20 @@ class Preds(Resource):
         return {"predictions": diction}
 
 
+class Actions(Resource):
+    """"""
+    def get(self):
+        """Send out emails"""
+        today = datetime.datetime(datetime.datetime.today.year, datetime.datetime.month, datetime.datetime.day, 0, 0, 0)
+        predictions = Predictions.query.filter(Predictions.date_time >= today).filter(Predictions.approved == 2).all()
+        users = Users.email.query.all()
+        email_list = []
+        for user in users:
+            email_list.append(user.email)
+        tipster.send_approved_predictions(email_list, predictions)
+        return {"message": "Emails sent"}
+
+
 api.add_resource(Preds, '/predictions/<string:start_date>/<string:end_date>')
 api.add_resource(Tips_id, '/predictions/<string:pred_id>' )
 api.add_resource(Tips, '/predictions/')
