@@ -10,7 +10,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from .models import Predictions, Tipster
 from .omy import ElementError
-from .email import ToAdmin
+# from .email import ToAdmin
 
 tipster = Tipster()
 
@@ -150,7 +150,7 @@ def all_other_tips_compiler(data_list):
             tipster.add_prediction(diction)
             email_message.append(diction)
     # need to send email here
-    ToAdmin.new_prediction(email_message)
+    # ToAdmin.new_prediction(email_message)
     return True
 
 
@@ -264,7 +264,7 @@ def save_prediction(data):
             tipster.add_prediction(diction)
             email_message.append(diction)
     # need to send email here
-    ToAdmin.new_prediction(email_message)
+    # ToAdmin.new_prediction(email_message)
     return True
 
 
@@ -332,12 +332,14 @@ def run():
         get_picks_from_tipsters_with_the_best_efficiency(soup)
     except ElementError as e:
         # send email for confirmation to admin and log issue
-        ToAdmin.error(e.__repr__())
+        # ToAdmin.error(e.__repr__())
+        pass
     try:
         get_all_other_tips()
     except ElementError as e:
         # send email for confirmation to admin and log issue
-        ToAdmin.error(e.__repr__())
+        # ToAdmin.error(e.__repr__())
+        pass
 
 if __name__ == '__main__':
     run()

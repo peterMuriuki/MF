@@ -6,7 +6,7 @@ from sqlalchemy.exc import OperationalError
 from .users import *
 from .predictions import *
 from .plan import *
-from .email import ToAdmin, ToUser
+# from .email import ToAdmin, ToUser
 from werkzeug.security import generate_password_hash
 
 
@@ -43,12 +43,12 @@ class Tipster(object):
         try:
             db.session.add(user)
             db.session.commit()
-            ToAdmin.new_subscriber(user)
-            ToUser.welcome_email(user)
+            # ToAdmin.new_subscriber(user)
+            # ToUser.welcome_email(user)
         except OperationalError as e:
             db.session.rollback()
             # do sth here maybe send a fkn email or throw another more manageable error
-            ToAdmin.error(e.__repr__())
+            # ToAdmin.error(e.__repr__())
         return user
 
     def add_prediction(self, data):
@@ -145,4 +145,5 @@ class Tipster(object):
     def send_approved_predictions(self, emails, predictions):
         """:parameter a list of predictions that will be passed to an email template
         : parameter: a lit of emails that would like to receive tips"""
-        ToUser.new_approved(emails, predictions)
+        # ToUser.new_approved(emails, predictions)
+        return True
