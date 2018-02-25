@@ -157,8 +157,6 @@ class Tips(Resource):
         input: -> nothing a user object parsed in from the decorator token required
         output: -> a dictionary of lists with the key prediction. the list conatains dictionaries representing predictions instances
         """
-        # run scrapper before the predictions are returned otherwise the predictions returned will not include the latest updates
-        run()
         from datetime import date as dt
         from datetime import datetime as cal
         date = dt.today()

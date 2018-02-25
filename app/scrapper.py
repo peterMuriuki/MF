@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 from .models import Predictions, Tipster
 from .omy import ElementError
 # from .email import ToAdmin
+import schedule
 
 tipster = Tipster()
 
@@ -340,6 +341,16 @@ def run():
         # send email for confirmation to admin and log issue
         # ToAdmin.error(e.__repr__())
         pass
+
+def initiate():
+    """:param: None
+    :-> Use schedule to well,.. schedule"""
+    run()
+    schedule.every(2).hour.do(run)
+
+    while True:
+        schedule.run_pending()
+
 
 if __name__ == '__main__':
     run()
