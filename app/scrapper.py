@@ -346,7 +346,7 @@ def initiate():
     """:param: None
     :-> Use schedule to well,.. schedule"""
     run()
-    schedule.every(2).hour.do(run)
+    schedule.every(2).hours.do(run)
 
     while True:
         schedule.run_pending()
