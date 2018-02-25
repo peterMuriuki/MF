@@ -34,9 +34,12 @@ class TeDev(MiddleWare):
     EANMBLE_ADMIN_PHONE_NUMBER = '0225468'
 
 
-class HerokuConfiguration(MiddleWare):
+class HerokuConfiguration(Configuration):
     """Different settings for heroku deployable application"""
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    MAIL_SERVER = 'smtp.googlemail.com'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
 
 
 class DevelopmentConfiguration(TeDev):
