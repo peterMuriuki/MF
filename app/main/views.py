@@ -160,7 +160,15 @@ class Tips(Resource):
     def get(self, current_user):
         """ returns a list of the current predictions of the current day, during test return all predictions
         input: -> query string parameters : from , to,  approved
-        output: -> a dictionary of lists with the key prediction. the list conatains dictionaries representing predictions instances
+        output: -> a dictionary of lists with the key prediction. the list conatains dictionaries
+        representing predictions instances
+        sample_response: {
+                            "predictions": {
+                                "18-02-2018": [],
+                                "19-02-2018": [],
+                                "20-02-2018": []
+                            }
+                        }
         """
         date = dt.today()
         today = cal(date.year, date.month, date.day, 0, 0, 0)
