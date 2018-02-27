@@ -6,7 +6,10 @@ from ..models import Tipster, Predictions, PredictionsSchema
 from ..scrapper import run
 from flask import Blueprint
 from datetime import timedelta
+from datetime import date as dt
+from datetime import datetime as cal
 import datetime
+from collections import OrderedDict
 
 main = Blueprint('main', __name__)
 
@@ -151,73 +154,39 @@ class Tips(Resource):
         return {'message': 'Prediction created successfully',
                 "prediction": pred_schema.dump(pred_obj).data}, 201
 
+    # non admin developers only have read only access and thus include the below 2 methods:
+    # i am only going to give them options to filter the below data
     @token_required
     def get(self, current_user):
         """ returns a list of the current predictions of the current day, during test return all predictions
-        input: -> nothing a user object parsed in from the decorator token required
+        input: -> query string parameters : from , to,  approved
         output: -> a dictionary of lists with the key prediction. the list conatains dictionaries representing predictions instances
         """
-        from datetime import date as dt
-        from datetime import datetime as cal
         date = dt.today()
         today = cal(date.year, date.month, date.day, 0, 0, 0)
-        q = request.args.get('q')
-        if q is not None:
-            date = datetime.datetime.strptime(q, '%d-%m-%Y')
-        if current_user.admin:
-            predictions = Predictions.query.filter(Predictions.date_time > today)\
-                .filter(Predictions.date_time < date + timedelta(days=1)).all()
-        else:
-            predictions = Predictions.query.filter(Predictions.date_time >= today).filter(Predictions.approved == 2).all()
-        list_ = []
-        for prediction in predictions:
-            list_.append(prediction)
-        result = predschema.dump(list_)
-        return {'predictions': result.data}
+        diction = OrderedDict()
+        _from = request.args.get('_from')
+        _to = request.args.get('_to')
+        approved = request.args.get('approved')
+        if _from and _to and approved:
+            _from = datetime.datetime.strptime(_from, '%d-%m-%Y')
+            _to = datetime.datetime.strptime(_to, '%d-%m-%Y')
+            while _from <= _to:
+                predictions = Predictions.query.filter(Predictions.date_time >=
+                                                       _from).filter(Predictions.approved == 2).all()
+                key = _from.strftime('%d-%m-%Y')
+                diction[key] = predschema.dump(predictions).data
+                _from += timedelta(days=1)
+            return {"predictions": diction}
+        elif _from and _to:
+            _from = datetime.datetime.strptime(_from, '%d-%m-%Y')
+            _to = datetime.datetime.strptime(_to, '%d-%m-%Y')
+            while _from <= _to:
+                predictions = Predictions.query.filter(Predictions.date_time >= _from).all()
+                key = _from.strftime('%d-%m-%Y')
+                diction[key] = predschema.dump(predictions).data
+                _from += timedelta(days=1)
+            return {"predictions": diction}
 
-
-class Preds(Resource):
-    """
-    Get: return saved predictions for a certain period of time
-    """
-
-    def get(self, start_date, end_date):
-        """Filter predictions from the start date through to the end date
-        sample: 127.0.0.1:5000/predictions/18-2-2018/20-2-2018
-        sample_reponse: {
-                            "predictions": {
-                                "18-02-2018": [],
-                                "19-02-2018": [],
-                                "20-02-2018": []
-                            }
-                        }
-        """
-        start_date = datetime.datetime.strptime(start_date, '%d-%m-%Y')
-        end_date = datetime.datetime.strptime(end_date, '%d-%m-%Y')
-        diction = {}
-        while start_date <= end_date:
-            predictions = Predictions.query.filter(Predictions.date_time >=
-                                               start_date).filter(Predictions.approved == 2)
-            key = start_date.strftime('%d-%m-%Y')
-            diction[key] = predschema.dump(predictions).data
-            start_date += timedelta(days=1)
-        return {"predictions": diction}
-
-
-class Actions(Resource):
-    """"""
-    def get(self):
-        """Send out emails"""
-        today = datetime.datetime(datetime.datetime.today.year, datetime.datetime.month, datetime.datetime.day, 0, 0, 0)
-        predictions = Predictions.query.filter(Predictions.date_time >= today).filter(Predictions.approved == 2).all()
-        users = Users.email.query.all()
-        email_list = []
-        for user in users:
-            email_list.append(user.email)
-        tipster.send_approved_predictions(email_list, predictions)
-        return {"message": "Emails sent"}
-
-
-api.add_resource(Preds, '/predictions/<string:start_date>/<string:end_date>')
 api.add_resource(Tips_id, '/predictions/<string:pred_id>' )
 api.add_resource(Tips, '/predictions/')
