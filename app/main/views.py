@@ -3,7 +3,7 @@ from flask import request, url_for, make_response
 from ..admin.views import token_required, Users, admin_eyes
 from flask_restful import Resource, Api, fields
 from ..models import Tipster, Predictions, PredictionsSchema
-from ..scrapper import run
+from ..scrapper import initiate
 from flask import Blueprint
 from datetime import timedelta
 from datetime import date as dt
@@ -170,6 +170,7 @@ class Tips(Resource):
                             }
                         }
         """
+        initiate()
         date = dt.today()
         today = cal(date.year, date.month, date.day, 0, 0, 0)
         diction = OrderedDict()
