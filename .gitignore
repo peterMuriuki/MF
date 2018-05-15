@@ -1,4 +1,5 @@
 /typEnv/
+/venv/
 /__pycache__/
 app/admin/__pycache__/
 app/main/__pycache__/
