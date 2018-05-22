@@ -3,7 +3,7 @@ from flask import request, url_for, make_response
 from ..admin.views import token_required, Users, admin_eyes
 from flask_restful import Resource, Api, fields
 from ..models import Tipster, Predictions, PredictionsSchema
-from ..scrapper import run
+from ..scrapper import run, initiate
 from flask import Blueprint
 from datetime import timedelta
 from datetime import date as dt
@@ -27,7 +27,7 @@ def default_response():
     return {
         'urls':
             {
-                'endpoint' : 'url_ednpoint url',
+                'endpoint' : 'url_endpoint url',
                 'Predictions': url_for('main.tips', _external=True),
                 'users': url_for('user.many', _external=True),
                 'help': url_for('main.default', _external=True)
@@ -110,6 +110,7 @@ class Tips_id(Resource):
         output: -> a dictionary containing the single prediction id
         """
         int(pred_id)
+        initiate()
         pred_obj = Predictions.query.filter_by(id=pred_id).first()
         if pred_obj is None:
             return {'message': 'prediction not found'}, 404
@@ -170,6 +171,7 @@ class Tips(Resource):
                             }
                         }
         """
+        initiate()
         date = dt.today()
         today = cal(date.year, date.month, date.day, 0, 0, 0)
         diction = OrderedDict()
