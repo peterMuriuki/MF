@@ -3,7 +3,11 @@ from flask import request, url_for, make_response
 from ..admin.views import token_required, Users, admin_eyes
 from flask_restful import Resource, Api, fields
 from ..models import Tipster, Predictions, PredictionsSchema
+<<<<<<< HEAD
 from ..scrapper import run, initiate
+=======
+from ..scrapper import initiate
+>>>>>>> 390e95debb1a24bea0934c7a690b316a274cd526
 from flask import Blueprint
 from datetime import timedelta
 from datetime import date as dt
