@@ -174,8 +174,9 @@ class Login(User):
         if auth:
             if not auth.username or not auth.password:
                 return login_failed('The auth object is present but problematic')
-                password = auth.password
             user = Users.query.filter_by(user_name=auth.username).first()
+            user_name = auth.username
+            password = auth.password
         else:
             # retrieve the authorisation data as json
             response = request.get_json()
@@ -186,7 +187,7 @@ class Login(User):
             return login_failed('The user with the username was not found')
         if check_password_hash(user.password, password):
             if not user.admin:
-                token = jwt.encode({'user_id': user.id, 'exp': dt.datetime.utcnow() + dt.timedelta(hours=1)}, key)
+                token = jwt.encode({'user_id': user.id, 'exp': dt.datetime.utcnow() + dt.timedelta(hours=24)}, key)
             else:
                 token = jwt.encode({'user_id': user.id}, key)
             return jsonify({'token': token.decode("UTF-8"), 'admin': user.admin})

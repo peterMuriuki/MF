@@ -196,6 +196,11 @@ class Tips(Resource):
                 diction[key] = predschema.dump(predictions).data
                 _from += timedelta(days=1)
             return {"predictions": diction}
+        elif not _from or not _to:
+            return {
+                "Message": "the date range is not well specified",
+                "status": "bad-request"
+            }, 400
 
 api.add_resource(Tips_id, '/predictions/<string:pred_id>' )
 api.add_resource(Tips, '/predictions/')

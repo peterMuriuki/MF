@@ -16,8 +16,7 @@ LAUNCH CONFIGURATION
         now you just have to start the server vua the below command
             python manage.py runserver
         
-        Ps: Every time you deploy the application, the system automatically drops all database tables and 
-        recreates them again. The configuration details of the test super user account can be found 
+        Ps: 
         
     PRODUCTION
         for a production case setup there are some crucial environment variables that you need to set. a comprehensive variables list is provided in the table below:
