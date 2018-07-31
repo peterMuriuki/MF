@@ -1,5 +1,6 @@
 import os
 database_base_uri = os.path.join(os.path.dirname(__file__), 'app', 'static', 'db')
+logs_url = os.path.join(os.path.dirname(__file__), 'logs', 'mainlog.log')
 
 
 class Configuration:
@@ -13,6 +14,50 @@ class Configuration:
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     # email to which the application can report to in regard to issues that concern the Admin
     WEBMASTER = os.environ.get('WEBMASTER')
+    logconf = {
+        "version": 1,
+        "disable_existing_loggers" : True,
+        "formatters":{
+            "simple": {
+                'class': 'logging.StreamHandler',
+                'format': '%(asctime)s[%(levelname)s] :  %(name)s : %(message)s'
+            },
+            'typersi':{
+                'class': 'logging.FileHandler',
+                'format': '%(asctime)s[%(levelname)s] :  %(name)s : %(message)s'
+            }
+        },
+        "handlers": {
+            "console": {
+                "class": 'logging.StreamHandler',
+                "level": 'DEBUG',
+                "formatter": 'simple'
+                },
+            'typersi_logs':{
+                'class': 'logging.FileHandler',
+                'level': 'INFO',
+                'filename': logs_url,
+                'mode': 'a',
+                'formatter': 'typersi'
+            }
+        },
+        "loggers":{
+            "simple_logger":{
+                "level": 'DEBUG',
+                "handlers": ['console'],
+                "propagate": 0
+            },
+            'typersi_logger':{
+                "level": 'INFO',
+                "handlers": ['typersi_logs'],
+                "propagate": 0
+            }
+        },
+        "root":{
+            "level": 'DEBUG',
+            "handlers": ['console', 'typersi_logs']
+        }
+    }
 
     @staticmethod  
     def init_app(app):
