@@ -16,3 +16,5 @@ app/static/db/development.db
 /app/static/db/
 /app/static/db/testing.db
 /.vscode/
+logs/*
+!logs/readme.md
