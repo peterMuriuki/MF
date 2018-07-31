@@ -116,7 +116,7 @@ def test_user_model_modification():
     # . we will also login as one of the users and test that they too can modify their own credentials
     login_data = {
         "user_name": "CAPTAINPRICE",
-        "password": "AD ARGA ADADSFA"
+        "password": "ADARGAADADSFA"
     }
     response = client.post(url_for('user.login'), data=j_son.dumps(login_data), headers=headers)
     assert(response.status_code == 200)
@@ -204,7 +204,7 @@ def test_user_by_admin():
     # Now its the administrator time to have some fun deleting users he does not like
     login_data = {
         "user_name": "CAPTAINPRICE",
-        "password": "AD ARGA ADADSFA"
+        "password": "ADARGAADADSFA"
     }
     response = client.post(url_for('user.login'), data=j_son.dumps(login_data), headers=headers)
     assert(response.status_code == 200)

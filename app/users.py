@@ -15,12 +15,9 @@ class Users(db.Model):
     user_name = db.Column(db.String(40))
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(100))
-    phone_number = db.Column(db.String(), nullable=True)
     admin = db.Column(db.Boolean())
-    plan = db.Column(db.String(10), nullable=True)
-    bankroll = db.Column(db.Float())
 
-    def __init__(self, name, user_name, email, password, admin=False, phone_number=None, bankroll=None, plan=None):
+    def __init__(self, name, user_name, email, password, admin=False):
         self.name = name
         self.email = email
         self.password = generate_password_hash(password)
@@ -30,24 +27,6 @@ class Users(db.Model):
     def __repr__(self):
         """__repr__"""
         return "<user{} {} {} {}>".format(self.id, self.user_name, self.email, self.admin)
-
-    def set_plan(self, plan):
-        """ Sets the plan as a string represetntations of the class name"""
-        self.plan = plan
-
-    def set_bankroll(self, bankroll):
-        """called upon once a user decides to credit his acount with cash"""
-        self.bankroll = bankroll
-
-    def set_phone_number(self, phone_number):
-        """ it is not all that imperative that a user acoount should hold the users phone number at registration
-        this interface will facilitate such updates after the user has registered and he/she can update the information
-        at their an arbitrary point in time
-        :param: a phone number in form of a string
-        :returns: None or raise error if input is not string"""
-        if not isinstance(phone_number, str):
-            raise ValueError("Unexpected input for phone number, should be string")
-        self.phone_number = phone_number
 
     @staticmethod
     def insert_test_admin():
@@ -60,10 +39,7 @@ class Users(db.Model):
         password = app.config['EANMBLE_ADMIN_PASSWORD']
         user_name = app.config['EANMBLE_ADMIN_USER_NAME']
         admin = True
-        phone_number = app.config['EANMBLE_ADMIN_PHONE_NUMBER']
-        bankroll = None
-        plan = None
-        admin = Users(name = name, user_name=user_name, email=email, password=password, admin=admin, phone_number=phone_number, bankroll=bankroll, plan=plan)
+        admin = Users(name = name, user_name=user_name, email=email, password=password, admin=admin)
         try:
             db.session.add(admin)
             db.session.commit()
@@ -82,10 +58,7 @@ class Users(db.Model):
         password = os.environ.get('EANMBLE_ADMIN_PASSWORD')
         user_name = os.environ.get('EANMBLE_ADMIN_USER_NAME')
         admin = True
-        phone_number = os.environ.get('EANMBLE_ADMIN_PHONE_NUMBER')
-        bankroll = None
-        plan = None
-        admin = Users(name = name, user_name=user_name, email=email, password=password, admin=admin, phone_number=phone_number, bankroll=bankroll, plan=plan)
+        admin = Users(name = name, user_name=user_name, email=email, password=password, admin=admin)
         try:
             db.session.add(admin)
             db.session.commit()
@@ -102,10 +75,7 @@ class UsersSchema(Schema):
     user_name = fields.String()
     email = fields.Email()
     password = fields.String()
-    phone_number = fields.Integer()
     admin = fields.Boolean()
-    plan = fields.String()
-    bankroll = fields.Float()
 
     @post_load
     def make_user(self, data):

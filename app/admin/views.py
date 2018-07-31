@@ -238,8 +238,7 @@ class RERegister(User):
                         "name": "<name>",
                         "email": "<email>",
                         "user_name": "<user_name>",
-                        "password": "<password>",
-                        "plan": "<plan>"
+                        "password": "<password>"
                     }}, 304
 
     @token_required

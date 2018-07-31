@@ -51,7 +51,7 @@ class Configuration:
     # general configurations
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'adau fagkfa821b 32bdc^!$@sad'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
-    # general email configuration
+    # general email configuration, sender email application
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME') 
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') 
     MAIL_USE_TLS = True
@@ -76,7 +76,6 @@ class TeDev(MiddleWare):
     EANMBLE_ADMIN_EMAIL = "EANMBLE@GMAIL.com"
     EANMBLE_ADMIN_PASSWORD = "ADARGAADADSFA"
     EANMBLE_ADMIN_USER_NAME = "CAPTAINPRICE"
-    EANMBLE_ADMIN_PHONE_NUMBER = '0225468'
 
 
 class HerokuConfiguration(Configuration):
