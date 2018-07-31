@@ -2,19 +2,7 @@ import os
 database_base_uri = os.path.join(os.path.dirname(__file__), 'app', 'static', 'db')
 logs_url = os.path.join(os.path.dirname(__file__), 'logs', 'mainlog.log')
 
-
-class Configuration:
-    # general configurations
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'adau fagkfa821b 32bdc^!$@sad'
-    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
-    # general email configuration
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') 
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') 
-    MAIL_USE_TLS = True
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
-    # email to which the application can report to in regard to issues that concern the Admin
-    WEBMASTER = os.environ.get('WEBMASTER')
-    logconf = {
+logconf = {
         "version": 1,
         "disable_existing_loggers" : True,
         "formatters":{
@@ -58,6 +46,18 @@ class Configuration:
             "handlers": ['console', 'typersi_logs']
         }
     }
+
+class Configuration:
+    # general configurations
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'adau fagkfa821b 32bdc^!$@sad'
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+    # general email configuration
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') 
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') 
+    MAIL_USE_TLS = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+    # email to which the application can report to in regard to issues that concern the Admin
+    WEBMASTER = os.environ.get('WEBMASTER')
 
     @staticmethod  
     def init_app(app):

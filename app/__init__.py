@@ -4,7 +4,7 @@ from flask_marshmallow import Marshmallow
 from flask_mail import Mail
 from flask_moment import Moment
 from flask import Flask
-from config import config
+from config import config, logconf
 import logging
 import logging.config
 
@@ -13,7 +13,7 @@ moment = Moment()
 db = SQLAlchemy()
 ma = Marshmallow()
 
-logging.config.dictConfig(config['logconf'])
+logging.config.dictConfig(logconf)
 tlogger = logging.getLogger('typersi_logger')
 slogger = logging.getLogger('simple_logger')
 

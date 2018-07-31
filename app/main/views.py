@@ -170,13 +170,18 @@ class Tips(Resource):
                             }
                         }
         """
-        initiate()
         date = dt.today()
         today = cal(date.year, date.month, date.day, 0, 0, 0)
         diction = OrderedDict()
         _from = request.args.get('_from')
         _to = request.args.get('_to')
         approved = request.args.get('approved')
+        if not _from or not _to:
+            return {
+                "Message": "the date range is not well specified",
+                "status": "bad-request"
+            }, 400
+        initiate()
         if _from and _to and approved:
             _from = datetime.datetime.strptime(_from, '%d-%m-%Y')
             _to = datetime.datetime.strptime(_to, '%d-%m-%Y')
@@ -196,11 +201,7 @@ class Tips(Resource):
                 diction[key] = predschema.dump(predictions).data
                 _from += timedelta(days=1)
             return {"predictions": diction}
-        elif not _from or not _to:
-            return {
-                "Message": "the date range is not well specified",
-                "status": "bad-request"
-            }, 400
+
 
 api.add_resource(Tips_id, '/predictions/<string:pred_id>' )
 api.add_resource(Tips, '/predictions/')
