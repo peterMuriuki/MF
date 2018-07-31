@@ -1,7 +1,7 @@
 """ Launch Script"""
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand, upgrade
-from app import create_app, db
+from app import create_app, db, slogger, tlogger
 from app.models import Predictions, Users
 from app.scrapper import initiate
 import os, sys
@@ -27,19 +27,12 @@ def deploy():
         Users.insert_admin() # will wok for all application configurations
     else:
         Users.insert_test_admin()
-
-    """
-    DEPLOYMENT PROCEDURE
-    add admin configuration variables to environment
-    push to heroku master
-    heroku deploy to construct the database and add the administrators account details
-    heroku restart
-    """
-    initiate()
+    tlogger.info("Application deployed succesfully")
 
 @manager.command
 def destroy():
     # just destroy the tables
+    tlogger.warning("Tables dropped")
     db.drop_all()
 
 if __name__ == '__main__':

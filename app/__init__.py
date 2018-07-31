@@ -5,12 +5,17 @@ from flask_mail import Mail
 from flask_moment import Moment
 from flask import Flask
 from config import config
-
+import logging
+import logging.config
 
 mail = Mail()
 moment = Moment()
 db = SQLAlchemy()
 ma = Marshmallow()
+
+logging.config.dictConfig(config['logconf'])
+tlogger = logging.getLogger('typersi_logger')
+slogger = logging.getLogger('simple_logger')
 
 
 def create_app(configuration_name):
@@ -20,6 +25,7 @@ def create_app(configuration_name):
         raise ValueError('Unknown configuration argument')
     app.config.from_object(config[configuration_name])
     config[configuration_name].init_app(app)
+    slogger.debug("Application instance created")
 
     mail.init_app(app)
     moment.init_app(app)
@@ -30,5 +36,6 @@ def create_app(configuration_name):
     from .admin.views import user
     app.register_blueprint(main)
     app.register_blueprint(user, url_prefix='/users')
+    slogger.debug("Blueprints succesfully added")
 
     return app

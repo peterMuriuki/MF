@@ -10,6 +10,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from .models import Predictions, Tipster
 from .omy import ElementError
+from . import slogger, tlogger
 # from .email import ToAdmin
 import schedule
 
@@ -24,6 +25,8 @@ def get_home_page(text=False, file=None):
     if file is None:
         home_url = 'http://www.typersi.com'
         index_html = requests.get(home_url).text
+        slogger.debug("getting home page information")
+        tlogger.info("inital home page scrapped completed succesfully")
     else:
         # read files and return text
         file_handler = open(file, 'r')
@@ -61,6 +64,7 @@ def get_picks_from_tipsters_with_the_best_efficiency(soup):
         diction['count'] = 0
     _response = {"efficient": data_list}
     save_prediction(data_list)
+    tlogger.info("finished scrapping data for tipsters with the best efficiency")
     return _response
 
 
@@ -91,6 +95,7 @@ def get_all_other_tips(file=None):
     desired_table = get_all_tips_desired_table(soup)
     tbody = desired_table.tbody
     tr_list = tbody.find_all('tr')
+    slogger.info("Ready to start scrapping all tips in remainder.html")
     data_list = parse_table_rows(tr_list)
     all_other_tips_compiler(data_list) 
     return {"all":data_list}
@@ -234,7 +239,7 @@ def parse_table_rows(tr_list):
 
         return home_score, away_score, sport
 
-
+    slogger.debug("started parsing table data")
     for tr in tr_list:
         try:
             temp_diction = {}
@@ -253,6 +258,7 @@ def parse_table_rows(tr_list):
             return_list.append(temp_diction)
         except ElementError:
             continue
+    slogger.debug("finished extracting data : with {} reords returned".format(str(len(return_list))))
     return return_list
 
   
@@ -313,16 +319,16 @@ def time_splitter(string):
     hour, minute = 0, 0
     if len(time_list) != 2:
         # send an email to admin
-        pass
+        tlogger.error("Date parsing error")
     try:
         hour = int(time_list[0])
         minute = int(time_list[1])
     except :
         #send an email: refused to cast into integer
-        pass
+        tlogger.error("Date data type not as expected")
     if not 0 <= hour < 24 and not 0 <= minute < 60:
         # send an email: data integrity broken
-        pass
+        tlogger.error("data validation for scrapped time, failed.")
     return [hour, minute]
 
 
