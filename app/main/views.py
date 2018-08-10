@@ -3,7 +3,11 @@ from flask import request, url_for, make_response
 from ..admin.views import token_required, Users, admin_eyes
 from flask_restful import Resource, Api, fields
 from ..models import Tipster, Predictions, PredictionsSchema
+<<<<<<< HEAD
+from ..scrapper import run, initiate
+=======
 from ..scrapper import initiate
+>>>>>>> 390e95debb1a24bea0934c7a690b316a274cd526
 from flask import Blueprint
 from datetime import timedelta
 from datetime import date as dt
@@ -27,7 +31,7 @@ def default_response():
     return {
         'urls':
             {
-                'endpoint' : 'url_ednpoint url',
+                'endpoint' : 'url_endpoint url',
                 'Predictions': url_for('main.tips', _external=True),
                 'users': url_for('user.many', _external=True),
                 'help': url_for('main.default', _external=True)
@@ -110,6 +114,7 @@ class Tips_id(Resource):
         output: -> a dictionary containing the single prediction id
         """
         int(pred_id)
+        initiate()
         pred_obj = Predictions.query.filter_by(id=pred_id).first()
         if pred_obj is None:
             return {'message': 'prediction not found'}, 404
@@ -186,7 +191,7 @@ class Tips(Resource):
             _from = datetime.datetime.strptime(_from, '%d-%m-%Y')
             _to = datetime.datetime.strptime(_to, '%d-%m-%Y')
             while _from <= _to:
-                predictions = Predictions.query.filter(Predictions.date_time >=
+                predictions = Predictions.query.filter(Predictions.date_time ==
                                                        _from).filter(Predictions.approved == 2).all()
                 key = _from.strftime('%d-%m-%Y')
                 diction[key] = predschema.dump(predictions).data
@@ -196,7 +201,7 @@ class Tips(Resource):
             _from = datetime.datetime.strptime(_from, '%d-%m-%Y')
             _to = datetime.datetime.strptime(_to, '%d-%m-%Y')
             while _from <= _to:
-                predictions = Predictions.query.filter(Predictions.date_time >= _from).all()
+                predictions = Predictions.query.filter(Predictions.date_time == _from).all()
                 key = _from.strftime('%d-%m-%Y')
                 diction[key] = predschema.dump(predictions).data
                 _from += timedelta(days=1)
