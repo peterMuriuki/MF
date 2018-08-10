@@ -1,37 +1,30 @@
 """Eanmble email options:
 to admin - > new tips
 to all users -> A new approved tip"""
-from . import mail
+from . import tlogger, slogger
 from flask import render_template, current_app
-from flask_mail import Message
-from threading import Thread
+import os, requests
 
-def async(f):
-    def wrapper(*args, **kwargs):
-        thr = Thread(target = f, args=args, kwargs=kwargs)
-        thr.start()
-    return wrapper
-
-@async
-def send_async_email(app, msg):
-    """requires an active application context and the msg"""
-    with app.app_context():
-        mail.send(msg)
+domain = "https://api.mailgun.net/v3/sandbox634d51bb58174800abf3e2c0f562b31e.mailgun.org/messages"
+api_key = os.environ.get('MAIL_GUN_API')
+if not api_key:
+    raise Exception('The mail gun api-key is not set')
 
 def send_email(subject, sender, recipients, text_body, html_body):
-    msg = Message(subject=subject, sender=sender, recipients=recipients)
-    msg.body = text_body
-    msg.html = html_body
-    app = current_app._get_current_object()
-    send_async_email(app, msg)
+    return requests.post(
+        domain,
+        auth=("api", api_key),
+        data={"from": "Mailgun Sandbox <postmaster@sandbox634d51bb58174800abf3e2c0f562b31e.mailgun.org>",
+              "to": recipients,
+              "subject": subject,
+              "text": text_body})
 
 
 class ToAdmin(object):
     """Represents all the templates of actions that will require the application to send emails to 
     the administrator
-    1 a new subscriber
-    2 a new unapproved tip
-    3 after the end of the recommended tips -> priority low
+    2 new unapproved tips
+    3. new subscriptions
     4 an error"""
 
     @staticmethod
@@ -49,16 +42,16 @@ class ToAdmin(object):
         app = current_app._get_current_object()
         subject = "(Hooray)NEW USER"
         html_body = render_template('email/new_user.html', user_obj = user_obj)
-        send_email(subject, app.config['MAIL_USERNAME'], [app.config['WEBMASTER']], message, html_body)
-        return True
+        return send_email(subject, app.config['MAIL_USERNAME'], [app.config['WEBMASTER']], message, html_body)
+        
 
     @staticmethod
-    def error(error_message):
+    def error(domain_of_error, error_message):
         """Forwards an error message to administrator"""
-        subject = "SHIT"
+        subject = domain_of_error
         app = current_app._get_current_object()
-        send_email(subject, app.config['MAIL_USERNAME'], [app.config['WEBMASTER']], error_message, error_message)
-        return True
+        return send_email(subject, app.config['MAIL_USERNAME'], [app.config['WEBMASTER']], error_message, '')
+        
 
     @staticmethod
     def new_prediction(predictions):
@@ -68,64 +61,27 @@ class ToAdmin(object):
         message = ""
         app = current_app._get_current_object()
         for prediction in predictions:
-            message += "{} {} {}\n".format(prediction['fixture'], prediction['pick'], prediction['odds'])
+            message += "{} {} {}\n".format(prediction['fixture'], prediction['pick'], str(prediction['odds']))
         html_body = render_template('email/new_predictions.html', predictions = predictions)
-        send_email(subject, app.config['MAIL_USERNAME'], [app.config['WEBMASTER']], message, html_body)
-        return True
-
-
-    def end_of_tip_session(self):
-        """
-        Pending sends an eamail detailing the results of the advised tips as well as the 
-        resultant effect on the bacnkroll
-        """
-        app = current_app._get_current_object()
-        pass
-
+        return send_email(subject, app.config['MAIL_USERNAME'], [app.config['WEBMASTER']], message, html_body)
+        
 class ToUser(object):
-    """
-     Represents the templates of the emails to be sent to notify a subscribed user
-    1 after a new prediction
-    2 after end of play for the given predictions
-    3 as a welcome message
-    """
-    # a welcome message:
+    """welcome message """
+    
     @staticmethod
-    def welcome_email(user_obj):
-        """Sends  welcome message to a new subscriber"""
-        message = """
-        hi {}
-            
-            Its so great that you decided to get onboard Eanmble_ts predictions site.
-        in the following days we hope to grow your bankroll without any hustle.
-
-        Eanmble offers another prediction service that will be coming up soon, Eanmble_sp.
-        We will notify you as soon as the service is up and running, in the meanwhile lets make
-        some dough.
-
-        yours,
-        Eanmble_ts admin
-        """.format(user_obj.name)
-
-        html_body = render_template('email/welcome.html', user_obj= user_obj)
-        subject = "{EANMBLE}Just Saying Hello"
-        app = current_app._get_current_object()
-        send_email(subject, app.config['MAIL_USERNAME'], [user_obj.email], message, html_body)
-
-    @staticmethod
-    def new_approved(email_list, predictions):
-        """ Emails a list of approved predictions to the emailing list of all users including the admin """
-        message = ""
-        subject = "Current Approved Predictions"
-        total_odds = 0.00
-        app = current_app._get_current_object()
-        for prediction in predictions:
-            message += " {} {} {}\n".format(prediction.fixture, prediction.pick, prediction.odds)
-        # we need to include staking information some where in the message
-        html_body = render_template('email/approved.html', predictions=predictions)
-        send_email(subject, app.config['MAIL_USERNAME'], email_list, message, html_body)
-        return True
-
-    def end_of_tip_session(self):
+    def welcome(user_object):
         """"""
-        pass
+        subject = "Saying Hello"
+        html_body = render_template('email/welcome.html', user_object=user_object)
+        message = """
+            hi {}
+                Its so great that you decided to get on-board Eanmble_ts predictions site.
+                in the following days we hope to grow your bankroll without any hustle.
+
+                Eanmble offers another prediction service that will be coming up soon, Eanmble_sp.
+                We will notify you as soon as the service is up and running, in the meanwhile lets make
+                some dough.
+
+                yours,
+                Eanmble_ts admin""".format(user_object.name)
+        return send_email(subject, '', user_object.email, message, html_body)
