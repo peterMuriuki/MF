@@ -19,3 +19,4 @@ app/static/db/development.db
 /.vscode/
 logs/*
 !logs/readme.md
+htest.env

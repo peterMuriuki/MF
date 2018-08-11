@@ -7,11 +7,11 @@ logconf = {
         "disable_existing_loggers" : True,
         "formatters":{
             "simple": {
-                'class': 'logging.StreamHandler',
-                'format': '%(asctime)s[%(levelname)s] :  %(name)s : %(message)s'
+                'class': 'logging.Formatter',
+                'format': '%(asctime)s [%(levelname)s] :  %(name)s : %(message)s'
             },
-            'typersi':{
-                'class': 'logging.FileHandler',
+            't':{
+                'class': 'logging.Formatter',
                 'format': '%(asctime)s[%(levelname)s] :  %(name)s : %(message)s'
             }
         },
@@ -21,12 +21,12 @@ logconf = {
                 "level": 'DEBUG',
                 "formatter": 'simple'
                 },
-            'typersi_logs':{
+            't_logs':{
                 'class': 'logging.FileHandler',
                 'level': 'INFO',
                 'filename': logs_url,
                 'mode': 'a',
-                'formatter': 'typersi'
+                'formatter': 't'
             }
         },
         "loggers":{
@@ -35,15 +35,15 @@ logconf = {
                 "handlers": ['console'],
                 "propagate": 0
             },
-            'typersi_logger':{
+            't_logger':{
                 "level": 'INFO',
-                "handlers": ['typersi_logs'],
+                "handlers": ['t_logs'],
                 "propagate": 0
             }
         },
         "root":{
             "level": 'DEBUG',
-            "handlers": ['console', 'typersi_logs']
+            "handlers": ['console', 't_logs']
         }
     }
 

@@ -12,7 +12,7 @@ db = SQLAlchemy()
 ma = Marshmallow()
 
 logging.config.dictConfig(logconf)
-tlogger = logging.getLogger('typersi_logger')
+tlogger = logging.getLogger('t_logger')
 slogger = logging.getLogger('simple_logger')
 
 
